@@ -1,212 +1,580 @@
+# AI Fluency Table Generator - Implementation Plan
 
-# Implementation Plan: [FEATURE]
+## Project Overview
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+**Project**: AI Fluency For Teams Application  
+**Constitution Compliance**: v1.0.0  
+**Specification Version**: v1.0.0  
+**Plan Created**: 2025-9-21
 
-## Execution Flow (/plan command scope)
+## Constitution Alignment
+
+This implementation plan adheres to the following constitutional principles:
+
+### Principle 1: AI Literacy Advancement
+- **Compliance**: Provides role-specific learning scales and practical application methods
+- **Implementation**: Structured learning paths with competency assessments
+- **Validation**: Progress tracking and skill advancement metrics
+
+### Principle 2: AI as Daily Tool Integration
+- **Compliance**: Focuses on practical AI tool usage in daily workflows
+- **Implementation**: Workflow integration guides and tool recommendations
+- **Validation**: Usage tracking and effectiveness measurement
+
+### Principle 3: Accessibility and Inclusion
+- **Compliance**: WCAG 2.1 AA compliant interface design
+- **Implementation**: Multiple learning formats and accommodation support
+- **Validation**: Accessibility testing and user feedback
+
+### Principle 4: Ethical Best Practices
+- **Compliance**: Ethical AI principles embedded in all recommendations
+- **Implementation**: Bias testing and human oversight protocols
+- **Validation**: Ethics review processes and accountability measures
+
+### Principle 5: Quality Assurance
+- **Compliance**: Human intervention and quality metrics for all AI implementations
+- **Implementation**: Systematic testing and peer review processes
+- **Validation**: Quality monitoring and continuous improvement
+
+### Principle 6: Knowledge Documentation
+- **Compliance**: Comprehensive documentation and sharing capabilities
+- **Implementation**: Resource library and knowledge sharing features
+- **Validation**: Metrics on how many submissions are made through the site
+
+## Implementation Roadmap
+
+### Phase 1: Foundation (Months 1-3)
+
+#### Month 1: Project Setup and Architecture
+**Objectives**:
+- Establish development environment and CI/CD pipeline
+- Establish UI
+- Set up database schema and core data models
+- Implement basic authentication and user management
+
+**Deliverables**:
+- [ ] Development environment setup
+- [ ] React frontend setup with TypeScript
+- [ ] Node.js/Express backend setup
+- [ ] PostgreSQL database schema implementation
+- [ ] Redis caching setup
+- [ ] Docker containerization setup
+- [ ] Docker Compose development configuration
+- [ ] Basic API endpoints
+- [ ] Core data models
+
+**Constitution Check**:
+- ✅ Accessibility: Development tools support accessibility testing
+- ✅ Quality: Code review processes established
+- ✅ Ethics: Privacy protection measures implemented
+
+#### Month 2: Fluency Table Engine
+**Objectives**:
+- Build role-based fluency table generation system
+- Implement fluency level definitions and criteria
+- Create table generation logic
+
+**Deliverables**:
+- [ ] Fluency table generation engine
+- [ ] OpenAI API integration
+- [ ] Redis caching system for responses
+- [ ] PostgreSQL storage for generated content
+- [ ] Fluency level definitions
+- [ ] Role-industry mapping system
+- [ ] Table generation API
+
+**Constitution Check**:
+- ✅ AI Literacy: Role-specific fluency criteria
+- ✅ Quality: Table generation validation and testing
+- ✅ Documentation: Table generation methodology documented
+
+#### Month 3: Individual User Experience
+**Objectives**:
+- Build individual user interface
+- Implement fluency table visualization
+- Create basic resource library and bookmarking
+
+**Deliverables**:
+- [ ] Individual user dashboard
+- [ ] Fluency table component
+- [ ] Resource browser
+- [ ] Bookmarking functionality
+
+**Constitution Check**:
+- ✅ Accessibility: WCAG 2.1 AA compliance
+- ✅ AI Literacy: Role-specific learning resources
+- ✅ Quality: User experience testing
+
+### Phase 2: Manager Features (Months 4-6)
+
+#### Month 4: Manager Dashboard
+**Objectives**:
+- Build team management interface
+- Implement team fluency table generation
+- Create manager guidance system
+
+**Deliverables**:
+- [ ] Manager dashboard
+- [ ] Team fluency table generation
+- [ ] Manager recommendations
+- [ ] Team progress tracking
+
+**Constitution Check**:
+- ✅ AI Literacy: Team-wide learning coordination
+- ✅ Documentation: Manager guidance documentation
+- ✅ Quality: Manager experience validation
+
+#### Month 5: Advanced Analytics
+**Objectives**:
+- Implement team analytics and reporting
+- Create recommendation engine
+- Build progress visualization
+
+**Deliverables**:
+- [ ] Analytics dashboard
+- [ ] Recommendation engine
+- [ ] Progress visualization
+- [ ] Reporting tools
+
+**Constitution Check**:
+- ✅ Quality: Analytics accuracy and reliability
+- ✅ Ethics: Privacy-compliant analytics
+- ✅ Documentation: Analytics methodology
+
+#### Month 6: Resource Enhancement
+**Objectives**:
+- Expand learning resource library
+- Implement example project system
+- Create content management tools
+
+**Deliverables**:
+- [ ] Expanded resource library
+- [ ] Example project system
+- [ ] Content management interface
+- [ ] Resource rating system
+
+**Constitution Check**:
+- ✅ AI Literacy: Comprehensive learning resources
+- ✅ Quality: Resource quality validation
+- ✅ Documentation: Resource documentation standards
+
+### Phase 3: Advanced Features (Months 7-9)
+
+#### Month 7: AI-Powered Features
+**Objectives**:
+- Implement AI-powered recommendations
+- Create intelligent content curation
+- Build adaptive learning paths
+
+**Deliverables**:
+- [ ] AI recommendation engine
+- [ ] Intelligent content curation
+- [ ] Adaptive learning system
+- [ ] Personalization features
+
+**Constitution Check**:
+- ✅ Ethics: AI recommendation transparency
+- ✅ Quality: AI system validation
+- ✅ Human Intervention: Human oversight protocols
+
+#### Month 8: Integration and APIs
+**Objectives**:
+- Build external API access
+- Implement third-party integrations
+- Create webhook system
+
+**Deliverables**:
+- [ ] Public API
+- [ ] Third-party integrations
+- [ ] Webhook system
+- [ ] API documentation
+
+**Constitution Check**:
+- ✅ Documentation: Comprehensive API documentation
+- ✅ Quality: API testing and validation
+- ✅ Security: API security measures
+
+#### Month 9: Optimization and Launch
+**Objectives**:
+- Performance optimization
+- Security hardening
+- Production deployment
+
+**Deliverables**:
+- [ ] Performance optimization
+- [ ] Security audit and hardening
+- [ ] Production Docker deployment
+- [ ] Kubernetes orchestration setup
+- [ ] Container registry configuration
+- [ ] Production monitoring setup
+- [ ] Launch preparation
+
+**Constitution Check**:
+- ✅ Quality: Production readiness validation
+- ✅ Security: Security audit compliance
+- ✅ Accessibility: Production accessibility testing
+
+## Technology Stack
+
+### Frontend
+- **Framework**: React with TypeScript
+- **UI Library**: Material-UI for accessibility compliance
+- **State Management**: Redux Toolkit or Zustand
+- **Charts/Tables**: Recharts for fluency visualizations
+- **Caching**: Redis for frontend caching
+
+### Backend
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: PostgreSQL (primary data storage)
+- **Caching**: Redis (OpenAI response caching)
+- **AI Integration**: OpenAI API
+
+### Infrastructure
+- **Cloud Provider**: AWS or Azure
+- **Containerization**: Docker with multi-stage builds
+- **Orchestration**: Kubernetes or Docker Compose
+- **CI/CD**: GitHub Actions or GitLab CI with Docker registry
+- **Container Registry**: Docker Hub or AWS ECR
+
+### Monitoring & Analytics
+- **Application Monitoring**: New Relic or DataDog
+- **Error Tracking**: Sentry
+- **Log Management**: ELK Stack
+- **Uptime Monitoring**: Pingdom or UptimeRobot
+
+## OpenAI Integration Strategy
+
+### API Usage
+- **Table Generation**: Generate fluency tables based on role + industry
+- **Resource Recommendations**: AI-powered learning resource suggestions
+- **Manager Guidance**: Generate team-specific recommendations
+- **Content Curation**: Intelligent content filtering and ranking
+
+### Caching Strategy
+- **Redis Caching**: Store OpenAI responses for 24-48 hours
+- **Cache Keys**: Role + Industry + Content Type
+- **Cache Invalidation**: Manual refresh or time-based expiration
+- **Fallback**: Direct OpenAI API call if cache miss
+
+### Response Storage
+- **Database Storage**: Store generated content in PostgreSQL
+- **Content Types**: Fluency tables, recommendations, resources
+- **Metadata**: Generation timestamp, model version, user context
+- **Retrieval**: Fast lookup for similar role/industry combinations
+
+## Data Architecture
+
+### PostgreSQL Schema
+```sql
+-- Fluency tables storage
+CREATE TABLE fluency_tables (
+  id UUID PRIMARY KEY,
+  role_id VARCHAR(100) NOT NULL,
+  industry VARCHAR(100) NOT NULL,
+  content JSONB NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- OpenAI responses cache
+CREATE TABLE openai_responses (
+  id UUID PRIMARY KEY,
+  prompt_hash VARCHAR(64) UNIQUE NOT NULL,
+  response JSONB NOT NULL,
+  model_version VARCHAR(50),
+  created_at TIMESTAMP DEFAULT NOW(),
+  expires_at TIMESTAMP NOT NULL
+);
+
+-- User profiles and preferences
+CREATE TABLE user_profiles (
+  id UUID PRIMARY KEY,
+  role_id VARCHAR(100) NOT NULL,
+  industry VARCHAR(100) NOT NULL,
+  preferences JSONB,
+  bookmarks JSONB,
+  created_at TIMESTAMP DEFAULT NOW(),
+  last_accessed TIMESTAMP DEFAULT NOW()
+);
 ```
-1. Load feature spec from Input path
-   → If not found: ERROR "No feature spec at {path}"
-2. Fill Technical Context (scan for NEEDS CLARIFICATION)
-   → Detect Project Type from context (web=frontend+backend, mobile=app+api)
-   → Set Structure Decision based on project type
-3. Fill the Constitution Check section based on the content of the constitution document.
-4. Evaluate Constitution Check section below
-   → If violations exist: Document in Complexity Tracking
-   → If no justification possible: ERROR "Simplify approach first"
-   → Update Progress Tracking: Initial Constitution Check
-5. Execute Phase 0 → research.md
-   → If NEEDS CLARIFICATION remain: ERROR "Resolve unknowns"
-6. Execute Phase 1 → contracts, data-model.md, quickstart.md, agent-specific template file (e.g., `CLAUDE.md` for Claude Code, `.github/copilot-instructions.md` for GitHub Copilot, `GEMINI.md` for Gemini CLI, `QWEN.md` for Qwen Code or `AGENTS.md` for opencode).
-7. Re-evaluate Constitution Check section
-   → If new violations: Refactor design, return to Phase 1
-   → Update Progress Tracking: Post-Design Constitution Check
-8. Plan Phase 2 → Describe task generation approach (DO NOT create tasks.md)
-9. STOP - Ready for /tasks command
+
+### Redis Caching Strategy
+```javascript
+// Cache key structure
+const cacheKeys = {
+  fluencyTable: `fluency_table:${roleId}:${industry}`,
+  resources: `resources:${roleId}:${industry}:${difficulty}`,
+  recommendations: `recommendations:${teamId}:${context}`
+};
+
+// Cache TTL (Time To Live)
+const cacheTTL = {
+  fluencyTable: 24 * 60 * 60, // 24 hours
+  resources: 12 * 60 * 60,    // 12 hours
+  recommendations: 6 * 60 * 60 // 6 hours
+};
 ```
 
-**IMPORTANT**: The /plan command STOPS at step 7. Phases 2-4 are executed by other commands:
-- Phase 2: /tasks command creates tasks.md
-- Phase 3-4: Implementation execution (manual or via tools)
+## Performance Optimization
 
-## Summary
-[Extract from feature spec: primary requirement + technical approach from research]
+### Caching Layers
+1. **Browser Cache**: Static assets and UI components
+2. **Redis Cache**: OpenAI responses and computed data
+3. **Database Cache**: Frequently accessed content
+4. **CDN Cache**: Global content delivery
 
-## Technical Context
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+### Response Time Targets
+- **Fluency Table Generation**: < 2 seconds (cached), < 5 seconds (new)
+- **Resource Loading**: < 500ms (cached), < 2 seconds (new)
+- **Page Load**: < 2 seconds
+- **API Responses**: < 500ms
 
-## Constitution Check
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+### Scalability Considerations
+- **Horizontal Scaling**: Multiple Node.js instances
+- **Database Scaling**: Read replicas for queries
+- **Cache Scaling**: Redis cluster for high availability
+- **CDN**: Global edge caching for static content
 
-[Gates determined based on constitution file]
+## Docker Configuration
 
-## Project Structure
+### Container Architecture
+- **Frontend Container**: React application with Nginx
+- **Backend Container**: Node.js/Express API server
+- **Database Container**: PostgreSQL with persistent volumes
+- **Cache Container**: Redis for caching
+- **Reverse Proxy**: Nginx for load balancing and SSL termination
 
-### Documentation (this feature)
+### Docker Compose Configuration
+```yaml
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://backend:5000
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/ai_fluency
+      - REDIS_URL=redis://redis:6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=ai_fluency
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
 ```
-specs/[###-feature]/
-├── plan.md              # This file (/plan command output)
-├── research.md          # Phase 0 output (/plan command)
-├── data-model.md        # Phase 1 output (/plan command)
-├── quickstart.md        # Phase 1 output (/plan command)
-├── contracts/           # Phase 1 output (/plan command)
-└── tasks.md             # Phase 2 output (/tasks command - NOT created by /plan)
+
+### Frontend Dockerfile
+```dockerfile
+# Multi-stage build for React frontend
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY . .
+RUN npm run build
+
+# Production stage with Nginx
+FROM nginx:alpine
+COPY --from=builder /app/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
 ```
 
-### Source Code (repository root)
-```
-# Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+### Backend Dockerfile
+```dockerfile
+# Multi-stage build for Node.js backend
+FROM node:18-alpine AS builder
 
-tests/
-├── contract/
-├── integration/
-└── unit/
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
 
-# Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
+COPY . .
+RUN npm run build
 
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
+# Production stage
+FROM node:18-alpine AS production
 
-# Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
 
-ios/ or android/
-└── [platform-specific structure]
+EXPOSE 5000
+CMD ["node", "dist/index.js"]
 ```
 
-**Structure Decision**: [DEFAULT to Option 1 unless Technical Context indicates web/mobile app]
+### Docker Development Setup
+```bash
+# Development environment
+docker-compose -f docker-compose.dev.yml up --build
 
-## Phase 0: Outline & Research
-1. **Extract unknowns from Technical Context** above:
-   - For each NEEDS CLARIFICATION → research task
-   - For each dependency → best practices task
-   - For each integration → patterns task
+# Production environment
+docker-compose -f docker-compose.prod.yml up -d
 
-2. **Generate and dispatch research agents**:
-   ```
-   For each unknown in Technical Context:
-     Task: "Research {unknown} for {feature context}"
-   For each technology choice:
-     Task: "Find best practices for {tech} in {domain}"
-   ```
+# Database migrations
+docker-compose exec backend npm run migrate
 
-3. **Consolidate findings** in `research.md` using format:
-   - Decision: [what was chosen]
-   - Rationale: [why chosen]
-   - Alternatives considered: [what else evaluated]
+# Seed database
+docker-compose exec backend npm run seed
+```
 
-**Output**: research.md with all NEEDS CLARIFICATION resolved
+### Container Orchestration
+- **Development**: Docker Compose for local development
+- **Staging**: Docker Compose with production-like configuration
+- **Production**: Kubernetes with Helm charts
+- **Scaling**: Horizontal Pod Autoscaler based on CPU/memory usage
 
-## Phase 1: Design & Contracts
-*Prerequisites: research.md complete*
+### Environment Configuration
+```bash
+# .env file for Docker Compose
+NODE_ENV=production
+DATABASE_URL=postgresql://postgres:password@postgres:5432/ai_fluency
+REDIS_URL=redis://redis:6379
+OPENAI_API_KEY=your_openai_api_key
+JWT_SECRET=your_jwt_secret
+PORT=5000
+```
 
-1. **Extract entities from feature spec** → `data-model.md`:
-   - Entity name, fields, relationships
-   - Validation rules from requirements
-   - State transitions if applicable
+### Health Checks
+```yaml
+# Health check configuration
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s
+```
 
-2. **Generate API contracts** from functional requirements:
-   - For each user action → endpoint
-   - Use standard REST/GraphQL patterns
-   - Output OpenAPI/GraphQL schema to `/contracts/`
+### Volume Management
+- **PostgreSQL Data**: Persistent volume for database
+- **Redis Data**: Persistent volume for cache
+- **SSL Certificates**: Volume for SSL certificates
+- **Logs**: Volume for application logs
 
-3. **Generate contract tests** from contracts:
-   - One test file per endpoint
-   - Assert request/response schemas
-   - Tests must fail (no implementation yet)
+### Security Configuration
+- **Non-root User**: Run containers as non-root user
+- **Secrets Management**: Use Docker secrets for sensitive data
+- **Network Isolation**: Separate networks for frontend, backend, and database
+- **Image Scanning**: Regular security scanning of container images
 
-4. **Extract test scenarios** from user stories:
-   - Each story → integration test scenario
-   - Quickstart test = story validation steps
+## Development Setup
 
-5. **Update agent file incrementally** (O(1) operation):
-   - Run `.specify/scripts/bash/update-agent-context.sh cursor`
-     **IMPORTANT**: Execute it exactly as specified above. Do not add or remove any arguments.
-   - If exists: Add only NEW tech from current plan
-   - Preserve manual additions between markers
-   - Update recent changes (keep last 3)
-   - Keep under 150 lines for token efficiency
-   - Output to repository root
+### Prerequisites
+- **Docker Engine**: Version 20.10 or higher
+- **Docker Compose**: Version 2.0 or higher
+- **Node.js**: Version 18 or higher (for local development)
+- **Git**: Version 2.0 or higher
 
-**Output**: data-model.md, /contracts/*, failing tests, quickstart.md, agent-specific file
+### Quick Start
+```bash
+# Clone the repository
+git clone <repository-url>
+cd AI-Fluency-for-Teams
 
-## Phase 2: Task Planning Approach
-*This section describes what the /tasks command will do - DO NOT execute during /plan*
+# Start development environment
+docker-compose -f docker-compose.dev.yml up --build
 
-**Task Generation Strategy**:
-- Load `.specify/templates/tasks-template.md` as base
-- Generate tasks from Phase 1 design docs (contracts, data model, quickstart)
-- Each contract → contract test task [P]
-- Each entity → model creation task [P] 
-- Each user story → integration test task
-- Implementation tasks to make tests pass
+# Access the application
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:5000
+# Database: localhost:5432
+# Redis: localhost:6379
+```
 
-**Ordering Strategy**:
-- TDD order: Tests before implementation 
-- Dependency order: Models before services before UI
-- Mark [P] for parallel execution (independent files)
+### Development Commands
+```bash
+# Start all services
+docker-compose up -d
 
-**Estimated Output**: 25-30 numbered, ordered tasks in tasks.md
+# View logs
+docker-compose logs -f
 
-**IMPORTANT**: This phase is executed by the /tasks command, NOT by /plan
+# Stop all services
+docker-compose down
 
-## Phase 3+: Future Implementation
-*These phases are beyond the scope of the /plan command*
+# Rebuild containers
+docker-compose up --build
 
-**Phase 3**: Task execution (/tasks command creates tasks.md)  
-**Phase 4**: Implementation (execute tasks.md following constitutional principles)  
-**Phase 5**: Validation (run tests, execute quickstart.md, performance validation)
+# Run database migrations
+docker-compose exec backend npm run migrate
 
-## Complexity Tracking
-*Fill ONLY if Constitution Check has violations that must be justified*
+# Seed database
+docker-compose exec backend npm run seed
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+# Access container shell
+docker-compose exec backend sh
+docker-compose exec frontend sh
+```
 
+### Environment Configuration
+```bash
+# Copy environment template
+cp .env.example .env
 
-## Progress Tracking
-*This checklist is updated during execution flow*
+# Edit environment variables
+nano .env
+```
 
-**Phase Status**:
-- [ ] Phase 0: Research complete (/plan command)
-- [ ] Phase 1: Design complete (/plan command)
-- [ ] Phase 2: Task planning complete (/plan command - describe approach only)
-- [ ] Phase 3: Tasks generated (/tasks command)
-- [ ] Phase 4: Implementation complete
-- [ ] Phase 5: Validation passed
+### Production Deployment
+```bash
+# Build production images
+docker-compose -f docker-compose.prod.yml build
 
-**Gate Status**:
-- [ ] Initial Constitution Check: PASS
-- [ ] Post-Design Constitution Check: PASS
-- [ ] All NEEDS CLARIFICATION resolved
-- [ ] Complexity deviations documented
+# Deploy to production
+docker-compose -f docker-compose.prod.yml up -d
 
----
-*Based on Constitution v2.1.1 - See `/memory/constitution.md`*
+# Scale services
+docker-compose -f docker-compose.prod.yml up --scale backend=3 -d
+```

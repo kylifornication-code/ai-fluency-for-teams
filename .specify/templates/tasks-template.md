@@ -1,127 +1,159 @@
-# Tasks: [FEATURE NAME]
+# AI Fluency Table Generator - Task Templates
 
-**Input**: Design documents from `/specs/[###-feature-name]/`
-**Prerequisites**: plan.md (required), research.md, data-model.md, contracts/
+## Task Categories
 
-## Execution Flow (main)
-```
-1. Load plan.md from feature directory
-   → If not found: ERROR "No implementation plan found"
-   → Extract: tech stack, libraries, structure
-2. Load optional design documents:
-   → data-model.md: Extract entities → model tasks
-   → contracts/: Each file → contract test task
-   → research.md: Extract decisions → setup tasks
-3. Generate tasks by category:
-   → Setup: project init, dependencies, linting
-   → Tests: contract tests, integration tests
-   → Core: models, services, CLI commands
-   → Integration: DB, middleware, logging
-   → Polish: unit tests, performance, docs
-4. Apply task rules:
-   → Different files = mark [P] for parallel
-   → Same file = sequential (no [P])
-   → Tests before implementation (TDD)
-5. Number tasks sequentially (T001, T002...)
-6. Generate dependency graph
-7. Create parallel execution examples
-8. Validate task completeness:
-   → All contracts have tests?
-   → All entities have models?
-   → All endpoints implemented?
-9. Return: SUCCESS (tasks ready for execution)
-```
+### Constitution Compliance Tasks
 
-## Format: `[ID] [P?] Description`
-- **[P]**: Can run in parallel (different files, no dependencies)
-- Include exact file paths in descriptions
+#### AI Literacy Advancement Tasks
+- **Task Type**: Learning Path Development
+- **Constitution Principle**: Principle 1 - AI Literacy Advancement
+- **Description**: Create role-specific learning paths and fluency table generation
+- **Acceptance Criteria**:
+  - [ ] Learning path covers all fluency levels (Unacceptable → Transformative)
+  - [ ] Role-specific content tailored to job function
+  - [ ] Fluency table generation based on role and industry
+  - [ ] Resource bookmarking and tracking capabilities
+- **Quality Gates**:
+  - [ ] Content reviewed by subject matter experts
+  - [ ] Fluency table accuracy validated
+  - [ ] Accessibility compliance verified
 
-## Path Conventions
-- **Single project**: `src/`, `tests/` at repository root
-- **Web app**: `backend/src/`, `frontend/src/`
-- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
-- Paths shown below assume single project - adjust based on plan.md structure
+#### Daily Tool Integration Tasks
+- **Task Type**: Workflow Integration
+- **Constitution Principle**: Principle 2 - AI as Daily Tool Integration
+- **Description**: Implement AI tools into daily workflows and processes
+- **Acceptance Criteria**:
+  - [ ] AI tools integrated into existing workflows
+  - [ ] Usage documentation and evaluation metrics
+  - [ ] Change management process for AI adoption
+  - [ ] Performance measurement framework
+- **Quality Gates**:
+  - [ ] Integration tested with real workflows
+  - [ ] User training materials created
+  - [ ] Effectiveness metrics established
 
-## Phase 3.1: Setup
-- [ ] T001 Create project structure per implementation plan
-- [ ] T002 Initialize [language] project with [framework] dependencies
-- [ ] T003 [P] Configure linting and formatting tools
+#### Accessibility Compliance Tasks
+- **Task Type**: Accessibility Implementation
+- **Constitution Principle**: Principle 3 - Accessibility and Inclusion
+- **Description**: Ensure all tools and materials are accessible to diverse users
+- **Acceptance Criteria**:
+  - [ ] WCAG 2.1 AA compliance verified
+  - [ ] Multiple learning format options available
+  - [ ] Accommodation request procedures implemented
+  - [ ] Regular accessibility audits scheduled
+- **Quality Gates**:
+  - [ ] Accessibility testing completed
+  - [ ] User accommodation testing performed
+  - [ ] Accessibility expert review completed
 
-## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
-**CRITICAL: These tests MUST be written and MUST FAIL before ANY implementation**
-- [ ] T004 [P] Contract test POST /api/users in tests/contract/test_users_post.py
-- [ ] T005 [P] Contract test GET /api/users/{id} in tests/contract/test_users_get.py
-- [ ] T006 [P] Integration test user registration in tests/integration/test_registration.py
-- [ ] T007 [P] Integration test auth flow in tests/integration/test_auth.py
+### Technical Implementation Tasks
 
-## Phase 3.3: Core Implementation (ONLY after tests are failing)
-- [ ] T008 [P] User model in src/models/user.py
-- [ ] T009 [P] UserService CRUD in src/services/user_service.py
-- [ ] T010 [P] CLI --create-user in src/cli/user_commands.py
-- [ ] T011 POST /api/users endpoint
-- [ ] T012 GET /api/users/{id} endpoint
-- [ ] T013 Input validation
-- [ ] T014 Error handling and logging
+#### Fluency Table Generation Tasks
+- **Task Type**: Core Feature Development
+- **Description**: Build fluency table generation system with OpenAI integration
+- **Acceptance Criteria**:
+  - [ ] Role-industry mapping system implemented
+  - [ ] OpenAI API integration for table generation
+  - [ ] Redis caching system for responses
+  - [ ] PostgreSQL storage for generated content
+  - [ ] Table generation API endpoint created
+  - [ ] Table visualization component built
+- **Quality Gates**:
+  - [ ] Table generation accuracy validated
+  - [ ] OpenAI API response time < 5 seconds
+  - [ ] Cache hit rate > 80% for common combinations
+  - [ ] Cross-role testing completed
 
-## Phase 3.4: Integration
-- [ ] T015 Connect UserService to DB
-- [ ] T016 Auth middleware
-- [ ] T017 Request/response logging
-- [ ] T018 CORS and security headers
+#### Frontend Development Tasks
+- **Task Type**: UI/UX Development
+- **Description**: Build user interface components and user experience
+- **Acceptance Criteria**:
+  - [ ] Responsive design implemented
+  - [ ] Accessibility compliance verified
+  - [ ] User experience testing completed
+  - [ ] Performance optimization implemented
+- **Quality Gates**:
+  - [ ] Cross-browser testing completed
+  - [ ] Mobile device testing completed
+  - [ ] Accessibility audit passed
+  - [ ] Performance benchmarks met
 
-## Phase 3.5: Polish
-- [ ] T019 [P] Unit tests for validation in tests/unit/test_validation.py
-- [ ] T020 Performance tests (<200ms)
-- [ ] T021 [P] Update docs/api.md
-- [ ] T022 Remove duplication
-- [ ] T023 Run manual-testing.md
+#### Backend Development Tasks
+- **Task Type**: API and Database Development
+- **Description**: Build Node.js backend with PostgreSQL and Redis
+- **Acceptance Criteria**:
+  - [ ] Express.js API endpoints implemented and tested
+  - [ ] PostgreSQL schema optimized for fluency tables
+  - [ ] Redis caching system implemented
+  - [ ] OpenAI API integration completed
+  - [ ] Security measures implemented
+  - [ ] Performance monitoring established
+- **Quality Gates**:
+  - [ ] API testing completed
+  - [ ] Security audit passed
+  - [ ] Performance testing completed
+  - [ ] Database optimization verified
+  - [ ] Redis caching performance validated
 
-## Dependencies
-- Tests (T004-T007) before implementation (T008-T014)
-- T008 blocks T009, T015
-- T016 blocks T018
-- Implementation before polish (T019-T023)
+#### Data Management Tasks
+- **Task Type**: Data Architecture
+- **Description**: Design and implement data models and management
+- **Acceptance Criteria**:
+  - [ ] Data models designed and implemented
+  - [ ] Data validation rules established
+  - [ ] Data privacy measures implemented
+  - [ ] Data backup and recovery procedures established
+- **Quality Gates**:
+  - [ ] Data model validation completed
+  - [ ] Privacy compliance verified
+  - [ ] Backup procedures tested
+  - [ ] Data integrity verified
 
-## Parallel Example
-```
-# Launch T004-T007 together:
-Task: "Contract test POST /api/users in tests/contract/test_users_post.py"
-Task: "Contract test GET /api/users/{id} in tests/contract/test_users_get.py"
-Task: "Integration test registration in tests/integration/test_registration.py"
-Task: "Integration test auth in tests/integration/test_auth.py"
-```
+#### OpenAI Integration Tasks
+- **Task Type**: AI Integration
+- **Description**: Integrate OpenAI API for content generation and caching
+- **Acceptance Criteria**:
+  - [ ] OpenAI API client implementation
+  - [ ] Prompt engineering for fluency tables
+  - [ ] Response parsing and validation
+  - [ ] Error handling and retry logic
+  - [ ] Rate limiting and cost optimization
+  - [ ] Content quality validation
+- **Quality Gates**:
+  - [ ] OpenAI API integration tested
+  - [ ] Response quality validated
+  - [ ] Error handling tested
+  - [ ] Cost optimization verified
+  - [ ] Rate limiting implemented
 
-## Notes
-- [P] tasks = different files, no dependencies
-- Verify tests fail before implementing
-- Commit after each task
-- Avoid: vague tasks, same file conflicts
+#### Docker Containerization Tasks
+- **Task Type**: Container Development
+- **Description**: Create and configure Docker containers for all services
+- **Acceptance Criteria**:
+  - [ ] Frontend Dockerfile with multi-stage build
+  - [ ] Backend Dockerfile with Node.js optimization
+  - [ ] Docker Compose configuration for all services
+  - [ ] Nginx configuration for reverse proxy
+  - [ ] Health checks for all containers
+  - [ ] Volume management for persistent data
+- **Quality Gates**:
+  - [ ] All containers build successfully
+  - [ ] Health checks pass
+  - [ ] Container security scan completed
+  - [ ] Performance testing completed
 
-## Task Generation Rules
-*Applied during main() execution*
-
-1. **From Contracts**:
-   - Each contract file → contract test task [P]
-   - Each endpoint → implementation task
-   
-2. **From Data Model**:
-   - Each entity → model creation task [P]
-   - Relationships → service layer tasks
-   
-3. **From User Stories**:
-   - Each story → integration test [P]
-   - Quickstart scenarios → validation tasks
-
-4. **Ordering**:
-   - Setup → Tests → Models → Services → Endpoints → Polish
-   - Dependencies block parallel execution
-
-## Validation Checklist
-*GATE: Checked by main() before returning*
-
-- [ ] All contracts have corresponding tests
-- [ ] All entities have model tasks
-- [ ] All tests come before implementation
-- [ ] Parallel tasks truly independent
-- [ ] Each task specifies exact file path
-- [ ] No task modifies same file as another [P] task
+#### Docker Deployment Tasks
+- **Task Type**: Deployment Configuration
+- **Description**: Configure Docker deployment for development and production
+- **Acceptance Criteria**:
+  - [ ] Development Docker Compose setup
+  - [ ] Production Docker Compose configuration
+  - [ ] Environment variable management
+  - [ ] Secrets management implementation
+  - [ ] Container registry configuration
+  - [ ] Kubernetes deployment manifests
+- **Quality Gates**:
+  - [ ] Local development environment working
+  - [ ] Production deployment tested
+  - [ ] Security configuration validated
+  - [ ] Monitoring and logging configured
