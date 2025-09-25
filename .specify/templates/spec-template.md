@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-The AI Fluency Table Generator is a web application that provides personalized AI fluency assessments and learning resources based on job roles and industries. The application serves two primary user types: individual contributors seeking to advance their AI skills, and managers looking to support their teams' AI fluency development.
+The AI Fluency Table Generator is a web application that provides personalized AI fluency assessments and learning resources based on job roles and industries. The application serves individual contributors seeking to advance their AI skills through role-specific learning paths and practical application.
 
 ## Functional Requirements
 
@@ -23,16 +23,8 @@ The AI Fluency Table Generator is a web application that provides personalized A
   - Recommended learning path based on role requirements
   - Resource bookmarking and favorites
 
-#### 2. Manager Team AI Fluency Dashboard
-- **Input**: Team composition (roles, responsibilities)
-- **Output**:
-  - Team-wide AI fluency overview
-  - Individual role fluency tables for each team member
-  - Manager guidance on supporting team AI development
-  - Team learning resource recommendations
-  - Team progress tracking and reporting
 
-#### 3. Resource and Project Library
+#### 2. Resource and Project Library
 - **Content Types**:
   - Learning materials (tutorials, courses, documentation)
   - Example projects with step-by-step guides
@@ -48,15 +40,8 @@ The AI Fluency Table Generator is a web application that provides personalized A
 3. **Exploration**: Detailed fluency level explanations and criteria
 4. **Resources**: Curated learning materials and example projects
 5. **Bookmarking**: Save favorite resources and track learning
-6. **Sharing**: Export tables and share with team members
+6. **Sharing**: Export tables and share with colleagues
 
-#### Manager User Journey
-1. **Team Setup**: Define team structure, roles, and responsibilities
-2. **Table Generation**: Generate fluency tables for all team roles
-3. **Dashboard**: Team overview with individual and collective insights
-4. **Guidance**: Manager-specific recommendations for supporting team development
-5. **Planning**: Create team learning plans and resource allocation
-6. **Monitoring**: Track team progress and identify support needs
 
 ## Technical Architecture
 
@@ -144,14 +129,6 @@ interface UserProfile {
   lastAccessed: Date;
 }
 
-interface TeamProfile {
-  teamId: string;
-  managerId: string;
-  members: TeamMember[];
-  overallFluency: number;
-  individualProfiles: UserProfile[];
-  recommendations: TeamRecommendation[];
-}
 
 interface FluencyTable {
   id: string;
@@ -187,15 +164,6 @@ GET /api/profile - Get user profile
 PUT /api/profile - Update user preferences
 ```
 
-#### Manager Endpoints
-```
-POST /api/team - Create team profile
-GET /api/team/{id} - Get team dashboard
-POST /api/team/{id}/members - Add team members
-GET /api/team/{id}/fluency-tables - Get all team fluency tables
-GET /api/team/{id}/recommendations - Get team recommendations
-POST /api/team/{id}/plan - Create team learning plan
-```
 
 #### Resource Endpoints
 ```
@@ -228,11 +196,6 @@ GET /api/analytics/usage - Get usage analytics
 - Rating and review system
 - Bookmarking and favorites
 
-#### Manager Dashboard
-- Team overview with visual metrics
-- Individual member cards with fluency levels
-- Recommendation engine for team development
-- Progress tracking and reporting tools
 
 ### Responsive Design
 - **Mobile**: Single-column layout, touch-friendly interactions
@@ -314,13 +277,13 @@ GET /api/analytics/usage - Get usage analytics
 - Individual user experience
 - Basic bookmarking functionality
 
-### Phase 2: Manager Features (Months 4-6)
-- Team fluency table generation
-- Manager dashboard
-- Team recommendations
-- Team progress tracking
+### Phase 2: Advanced Features (Months 4-6)
+- Enhanced resource library
+- Advanced search and filtering
+- User analytics and insights
+- Social sharing features
 
-### Phase 3: Advanced Features (Months 7-9)
+### Phase 3: AI-Powered Features (Months 7-9)
 - AI-powered recommendations
 - Advanced analytics
 - Social learning features
@@ -338,7 +301,7 @@ GET /api/analytics/usage - Get usage analytics
 - **Skill Advancement**: 50% users advance one fluency level
 - **Project Completion**: 40% users complete example projects
 - **Knowledge Sharing**: 30% users share resources with team
-- **Manager Satisfaction**: 4.5+ star rating from managers
+- **User Satisfaction**: 4.5+ star rating from users
 
 ## Risk Assessment
 

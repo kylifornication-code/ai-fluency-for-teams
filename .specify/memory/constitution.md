@@ -21,16 +21,16 @@ We establish this constitution to govern our collective commitment to advancing 
 ## Core Principles
 
 ### Principle 1: AI Literacy Advancement
-**MUST** continuously advance team AI literacy through providing various job roles scales for learning AI and methods for advancing their AI knowlege through practical application, and knowledge sharing. All team members MUST demonstrate competency in AI concepts relevant to their roles. Rationale: AI literacy is foundational to effective role performance in the future, while advancing AI skills and usage prevents misuse or underutilization of AI capabilities.
+**MUST** continuously advance individual AI literacy through providing various job roles scales for learning AI and methods for advancing their AI knowledge through practical application, and knowledge sharing. All users MUST demonstrate competency in AI concepts relevant to their roles. Rationale: AI literacy is foundational to effective role performance in the future, while advancing AI skills and usage prevents misuse or underutilization of AI capabilities.
 
 ### Principle 2: AI as Daily Tool Integration
-**MUST** integrate AI tools into daily workflows and decision-making processes. Teams MUST identify and implement AI solutions for routine tasks, data analysis, and strategic planning. All AI tool usage MUST be documented and evaluated for effectiveness. Rationale: AI becomes valuable only when actively used; passive knowledge without application provides no organizational benefit.
+**MUST** integrate AI tools into daily workflows and decision-making processes. Users MUST identify and implement AI solutions for routine tasks, data analysis, and strategic planning. All AI tool usage MUST be documented and evaluated for effectiveness. Rationale: AI becomes valuable only when actively used; passive knowledge without application provides no organizational benefit.
 
 ### Principle 3: Accessibility and Inclusion
-**MUST** ensure all tools with AI capabilities, training materials, and processes are accessible to team members regardless of technical background or learning preferences. AI implementations MUST include accessibility testing and accommodate diverse user needs. Rationale: AI benefits are maximized when all team members can participate equally; exclusionary practices limit organizational potential.
+**MUST** ensure all tools with AI capabilities, training materials, and processes are accessible to users regardless of technical background or learning preferences. AI implementations MUST include accessibility testing and accommodate diverse user needs. Rationale: AI benefits are maximized when all users can participate equally; exclusionary practices limit individual potential.
 
 ### Principle 4: Ethical Best Practices
-**MUST** adhere to ethical AI principles in all implementations, including fairness, transparency, privacy protection, and human oversight. All AI decisions MUST be explainable and reversible. Teams MUST conduct regular ethics reviews of AI usage and maintain accountability for AI-driven outcomes. Rationale: Ethical AI practices protect stakeholders, maintain trust, and ensure long-term sustainability of AI adoption.
+**MUST** adhere to ethical AI principles in all implementations, including fairness, transparency, privacy protection, and human oversight. All AI decisions MUST be explainable and reversible. Users MUST conduct regular ethics reviews of AI usage and maintain accountability for AI-driven outcomes. Rationale: Ethical AI practices protect stakeholders, maintain trust, and ensure long-term sustainability of AI adoption.
 
 ### Principle 5: Quality Assurance and Continuous Improvement
 **MUST** maintain high-quality standards for all work through systematic testing, peer review, and performance monitoring. All AI implementations MUST include human intervention, quality metrics, regular evaluation, and improvement cycles. Rationale: Quality assurance prevents AI failures, ensures reliable outcomes, and builds confidence in AI tools.
