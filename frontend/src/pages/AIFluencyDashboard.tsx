@@ -120,13 +120,24 @@ const AIFluencyDashboard: React.FC = () => {
     setError(null);
 
     try {
-      const response = await axios.get(
-        `/api/fluency-table/${selectedRole.id}/${selectedIndustry}`
-      );
+      // Try AI-powered generation first
+      const response = await axios.post('/api/fluency-table', {
+        roleTitle: selectedRole.title,
+        industry: selectedIndustry
+      });
       setFluencyTable(response.data);
     } catch (err) {
-      setError('Failed to generate fluency table');
-      console.error('Error generating table:', err);
+      console.warn('AI generation failed, falling back to mock data:', err);
+      try {
+        // Fallback to mock data
+        const fallbackResponse = await axios.get(
+          `/api/fluency-table/${selectedRole.id}/${selectedIndustry}`
+        );
+        setFluencyTable(fallbackResponse.data);
+      } catch (fallbackErr) {
+        setError('Failed to generate fluency table');
+        console.error('Error generating table:', fallbackErr);
+      }
     } finally {
       setLoading(false);
     }

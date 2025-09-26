@@ -2,15 +2,40 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
+import { config, validateEnvironment } from './config/environment';
+import { OpenAIService } from './services/openai';
+import { CacheService } from './services/cache';
+import { validateRequest, fluencyTableSchema, resourceRecommendationsSchema, learningPathSchema, bookmarkSchema } from './validation/schemas';
+
+// Validate environment variables
+validateEnvironment();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = config.app.port;
+
+// Initialize services
+const openaiService = OpenAIService.getInstance();
+const cacheService = CacheService.getInstance();
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: config.security.apiRateLimit,
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: config.app.frontendUrl,
+  credentials: true
+}));
 app.use(morgan('combined'));
 app.use(express.json());
+app.use(limiter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -41,10 +66,38 @@ app.get('/api/industries', (req, res) => {
   ]);
 });
 
+// AI-powered fluency table generation
+app.post('/api/fluency-table', validateRequest(fluencyTableSchema), async (req, res) => {
+  try {
+    const { roleTitle, industry } = req.validatedData;
+    
+    // Check cache first
+    const cached = await cacheService.getFluencyTable(roleTitle, industry);
+    if (cached) {
+      return res.json({ ...cached, cached: true });
+    }
+
+    // Generate with OpenAI
+    const fluencyTable = await openaiService.generateFluencyTable(roleTitle, industry);
+    
+    // Cache the result
+    await cacheService.setFluencyTable(roleTitle, industry, fluencyTable);
+    
+    res.json(fluencyTable);
+  } catch (error) {
+    console.error('Error generating fluency table:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate fluency table',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Fallback to mock data if OpenAI is not available
 app.get('/api/fluency-table/:roleId/:industry', (req, res) => {
   const { roleId, industry } = req.params;
   
-  // Mock fluency table response
+  // Mock fluency table response (fallback)
   res.json({
     roleId,
     industry,
@@ -178,8 +231,81 @@ app.get('/api/resources', (req, res) => {
   ]);
 });
 
-app.post('/api/bookmarks', (req, res) => {
-  const { resourceId, userId } = req.body;
+// AI-powered resource recommendations
+app.post('/api/resources/recommendations', validateRequest(resourceRecommendationsSchema), async (req, res) => {
+  try {
+    const { roleTitle, industry, currentLevel } = req.validatedData;
+    
+    // Check cache first
+    const cached = await cacheService.getResourceRecommendations(roleTitle, industry, currentLevel);
+    if (cached) {
+      return res.json({ ...cached, cached: true });
+    }
+
+    // Generate with OpenAI
+    const recommendations = await openaiService.generateResourceRecommendations(roleTitle, industry, currentLevel);
+    
+    // Cache the result
+    await cacheService.setResourceRecommendations(roleTitle, industry, currentLevel, recommendations);
+    
+    res.json(recommendations);
+  } catch (error) {
+    console.error('Error generating resource recommendations:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate resource recommendations',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// AI-powered learning path generation
+app.post('/api/learning-path', validateRequest(learningPathSchema), async (req, res) => {
+  try {
+    const { roleTitle, industry, currentLevel, targetLevel } = req.validatedData;
+    
+    // Check cache first
+    const cached = await cacheService.getLearningPath(roleTitle, industry, currentLevel, targetLevel);
+    if (cached) {
+      return res.json({ ...cached, cached: true });
+    }
+
+    // Generate with OpenAI
+    const learningPath = await openaiService.generateLearningPath(roleTitle, industry, currentLevel, targetLevel);
+    
+    // Cache the result
+    await cacheService.setLearningPath(roleTitle, industry, currentLevel, targetLevel, learningPath);
+    
+    res.json(learningPath);
+  } catch (error) {
+    console.error('Error generating learning path:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate learning path',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Cache management endpoints
+app.get('/api/cache/stats', async (req, res) => {
+  try {
+    const stats = await cacheService.getCacheStats();
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get cache stats' });
+  }
+});
+
+app.delete('/api/cache', async (req, res) => {
+  try {
+    await cacheService.clearCache();
+    res.json({ message: 'Cache cleared successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to clear cache' });
+  }
+});
+
+app.post('/api/bookmarks', validateRequest(bookmarkSchema), (req, res) => {
+  const { resourceId, userId } = req.validatedData;
   res.json({ 
     success: true, 
     message: 'Resource bookmarked successfully',
