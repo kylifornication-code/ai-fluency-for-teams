@@ -89,13 +89,29 @@ A comprehensive web application that provides personalized AI fluency assessment
 
 ### 🐳 Docker Setup (Optional)
 
+#### Development Mode
 1. **Start all services**:
    ```bash
    docker-compose -f docker/docker-compose.dev.yml up --build
    ```
 
-2. **Access the application**:
+2. **Test the deployment**:
+   ```bash
+   ./test-docker.sh
+   ```
+
+3. **Access the application**:
    - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5001
+
+#### Production Mode
+1. **Start production services**:
+   ```bash
+   docker-compose -f docker/docker-compose.prod.yml up --build
+   ```
+
+2. **Access the application**:
+   - Frontend: http://localhost:3000 (served by Nginx)
    - Backend API: http://localhost:5001
 
 ## 🔌 API Endpoints

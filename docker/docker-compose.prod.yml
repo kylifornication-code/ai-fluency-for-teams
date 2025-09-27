@@ -2,31 +2,28 @@ services:
   frontend:
     build:
       context: ../frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
-      - DOCKER=true
-    volumes:
-      - ../frontend:/app
-      - /app/node_modules
+      - NODE_ENV=production
     depends_on:
       - backend
 
   backend:
     build:
       context: ../backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     ports:
       - "5001:5001"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=5001
       - FRONTEND_URL=http://localhost:3000
     volumes:
-      - ../backend:/app
-      - /app/node_modules
       - ./data:/app/data
     env_file:
       - ../backend/.env
+
+volumes:
+  data:
