@@ -83,6 +83,7 @@ const AIFluencyDashboard: React.FC = () => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasAttemptedGeneration, setHasAttemptedGeneration] = useState(false);
 
   // Load initial data
   useEffect(() => {
@@ -106,10 +107,12 @@ const AIFluencyDashboard: React.FC = () => {
     loadInitialData();
   }, []);
 
-  // Generate fluency table when both role and industry are selected
+  // Reset table when role or industry changes
   useEffect(() => {
-    if (selectedRole && selectedIndustry) {
-      generateFluencyTable();
+    if (fluencyTable) {
+      setFluencyTable(null);
+      setHasAttemptedGeneration(false);
+      setError(null);
     }
   }, [selectedRole, selectedIndustry]);
 
@@ -118,6 +121,7 @@ const AIFluencyDashboard: React.FC = () => {
 
     setLoading(true);
     setError(null);
+    setHasAttemptedGeneration(true);
 
     try {
       // Try AI-powered generation first
@@ -254,7 +258,7 @@ const AIFluencyDashboard: React.FC = () => {
         )}
 
         {/* Fluency Table */}
-        {fluencyTable && (
+        {fluencyTable ? (
           <Card sx={{ mb: 4 }}>
             <CardContent>
               <Typography variant="h5" gutterBottom>
@@ -334,6 +338,22 @@ const AIFluencyDashboard: React.FC = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card sx={{ mb: 4 }}>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                AI Fluency Assessment
+              </Typography>
+              <Typography variant="body1" color="text.secondary" align="center" sx={{ py: 4 }}>
+                {!selectedRole || !selectedIndustry 
+                  ? 'Please select your job title and industry above, then click "Generate Table" to see your personalized AI fluency assessment.'
+                  : hasAttemptedGeneration && !fluencyTable
+                  ? 'Click "Generate Table" to create your personalized AI fluency assessment.'
+                  : `Ready to generate your AI fluency assessment for ${selectedRole.title} in ${selectedIndustry}. Click "Generate Table" to begin.`
+                }
+              </Typography>
             </CardContent>
           </Card>
         )}

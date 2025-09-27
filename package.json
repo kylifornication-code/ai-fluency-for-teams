@@ -1,1 +1,1 @@
-{"name":"ai-fluency-for-teams","private":true,"version":"0.1.0","workspaces":["frontend","backend"],"scripts":{"dev":"echo \"Use per-package dev scripts\"","build":"echo \"Use per-package build scripts\""}}
+{"name":"ai-fluency-for-teams","private":true,"version":"0.1.0","workspaces":["frontend","backend"],"scripts":{"dev":"echo \"Use per-package dev scripts\"","build":"echo \"Use per-package build scripts\""},"dependencies":{"axios":"^1.12.2"}}

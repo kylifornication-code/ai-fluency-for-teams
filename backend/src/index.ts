@@ -5,7 +5,6 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { config, validateEnvironment } from './config/environment';
 import { OpenAIService } from './services/openai';
-import { CacheService } from './services/cache';
 import { validateRequest, fluencyTableSchema, resourceRecommendationsSchema, learningPathSchema, bookmarkSchema } from './validation/schemas';
 
 // Validate environment variables
@@ -16,7 +15,6 @@ const PORT = config.app.port;
 
 // Initialize services
 const openaiService = OpenAIService.getInstance();
-const cacheService = CacheService.getInstance();
 
 // Rate limiting
 const limiter = rateLimit({
@@ -40,6 +38,18 @@ app.use(limiter);
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Simple test endpoint for debugging
+app.post('/api/test-fluency', async (req, res) => {
+  try {
+    console.log('Test endpoint called');
+    const fluencyTable = await openaiService.generateFluencyTable('Software Engineer', 'Technology');
+    res.json(fluencyTable);
+  } catch (error) {
+    console.error('Test endpoint error:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
 });
 
 // MVP API routes
@@ -69,20 +79,14 @@ app.get('/api/industries', (req, res) => {
 // AI-powered fluency table generation
 app.post('/api/fluency-table', validateRequest(fluencyTableSchema), async (req, res) => {
   try {
-    const { roleTitle, industry } = req.validatedData;
+    const { roleTitle, industry } = (req as any).validatedData;
     
-    // Check cache first
-    const cached = await cacheService.getFluencyTable(roleTitle, industry);
-    if (cached) {
-      return res.json({ ...cached, cached: true });
-    }
-
+    console.log(`Generating fluency table for ${roleTitle} in ${industry}`);
+    
     // Generate with OpenAI
     const fluencyTable = await openaiService.generateFluencyTable(roleTitle, industry);
     
-    // Cache the result
-    await cacheService.setFluencyTable(roleTitle, industry, fluencyTable);
-    
+    console.log('Sending response...');
     res.json(fluencyTable);
   } catch (error) {
     console.error('Error generating fluency table:', error);
@@ -234,19 +238,10 @@ app.get('/api/resources', (req, res) => {
 // AI-powered resource recommendations
 app.post('/api/resources/recommendations', validateRequest(resourceRecommendationsSchema), async (req, res) => {
   try {
-    const { roleTitle, industry, currentLevel } = req.validatedData;
+    const { roleTitle, industry, currentLevel } = (req as any).validatedData;
     
-    // Check cache first
-    const cached = await cacheService.getResourceRecommendations(roleTitle, industry, currentLevel);
-    if (cached) {
-      return res.json({ ...cached, cached: true });
-    }
-
     // Generate with OpenAI
     const recommendations = await openaiService.generateResourceRecommendations(roleTitle, industry, currentLevel);
-    
-    // Cache the result
-    await cacheService.setResourceRecommendations(roleTitle, industry, currentLevel, recommendations);
     
     res.json(recommendations);
   } catch (error) {
@@ -261,19 +256,10 @@ app.post('/api/resources/recommendations', validateRequest(resourceRecommendatio
 // AI-powered learning path generation
 app.post('/api/learning-path', validateRequest(learningPathSchema), async (req, res) => {
   try {
-    const { roleTitle, industry, currentLevel, targetLevel } = req.validatedData;
+    const { roleTitle, industry, currentLevel, targetLevel } = (req as any).validatedData;
     
-    // Check cache first
-    const cached = await cacheService.getLearningPath(roleTitle, industry, currentLevel, targetLevel);
-    if (cached) {
-      return res.json({ ...cached, cached: true });
-    }
-
     // Generate with OpenAI
     const learningPath = await openaiService.generateLearningPath(roleTitle, industry, currentLevel, targetLevel);
-    
-    // Cache the result
-    await cacheService.setLearningPath(roleTitle, industry, currentLevel, targetLevel, learningPath);
     
     res.json(learningPath);
   } catch (error) {
@@ -285,27 +271,9 @@ app.post('/api/learning-path', validateRequest(learningPathSchema), async (req, 
   }
 });
 
-// Cache management endpoints
-app.get('/api/cache/stats', async (req, res) => {
-  try {
-    const stats = await cacheService.getCacheStats();
-    res.json(stats);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get cache stats' });
-  }
-});
-
-app.delete('/api/cache', async (req, res) => {
-  try {
-    await cacheService.clearCache();
-    res.json({ message: 'Cache cleared successfully' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to clear cache' });
-  }
-});
 
 app.post('/api/bookmarks', validateRequest(bookmarkSchema), (req, res) => {
-  const { resourceId, userId } = req.validatedData;
+  const { resourceId, userId } = (req as any).validatedData;
   res.json({ 
     success: true, 
     message: 'Resource bookmarked successfully',

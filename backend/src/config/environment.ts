@@ -19,12 +19,6 @@ export const config = {
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   },
   
-  // Caching Configuration
-  cache: {
-    redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
-    ttl: parseInt(process.env.CACHE_TTL || '3600'), // 1 hour
-  },
-  
   // Security Configuration
   security: {
     jwtSecret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',

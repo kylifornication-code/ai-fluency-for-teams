@@ -46,7 +46,7 @@ export const validateRequest = (schema: Joi.ObjectSchema) => {
       });
     }
     
-    req.validatedData = value;
+    (req as any).validatedData = value;
     next();
   };
 };
