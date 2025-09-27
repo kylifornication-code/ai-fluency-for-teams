@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { config, validateEnvironment } from './config/environment';
 import { OpenAIService } from './services/openai';
+import { DatabaseService } from './services/database';
 import { validateRequest, fluencyTableSchema, resourceRecommendationsSchema, learningPathSchema, bookmarkSchema } from './validation/schemas';
 
 // Validate environment variables
@@ -15,6 +16,7 @@ const PORT = config.app.port;
 
 // Initialize services
 const openaiService = OpenAIService.getInstance();
+const databaseService = DatabaseService.getInstance();
 
 // Rate limiting
 const limiter = rateLimit({
@@ -52,15 +54,9 @@ app.post('/api/test-fluency', async (req, res) => {
   }
 });
 
-// MVP API routes
+// MVP API routes - Job titles are now free form, no predefined list needed
 app.get('/api/roles', (req, res) => {
-  res.json([
-    { id: '1', title: 'Software Engineer', industry: 'Technology' },
-    { id: '2', title: 'Data Scientist', industry: 'Technology' },
-    { id: '3', title: 'Product Manager', industry: 'Technology' },
-    { id: '4', title: 'Marketing Manager', industry: 'Marketing' },
-    { id: '5', title: 'Sales Representative', industry: 'Sales' }
-  ]);
+  res.json([]); // Empty array since we're using free form search
 });
 
 app.get('/api/industries', (req, res) => {
@@ -83,8 +79,20 @@ app.post('/api/fluency-table', validateRequest(fluencyTableSchema), async (req, 
     
     console.log(`Generating fluency table for ${roleTitle} in ${industry}`);
     
+    // Check database first
+    const cached = await databaseService.getFluencyTable(roleTitle, industry);
+    if (cached) {
+      console.log('✅ Serving from database cache');
+      const fluencyTable = JSON.parse(cached.response);
+      return res.json({ ...fluencyTable, cached: true });
+    }
+
+    console.log('🔄 Not found in database, generating with OpenAI...');
     // Generate with OpenAI
     const fluencyTable = await openaiService.generateFluencyTable(roleTitle, industry);
+    
+    // Save to database for future use
+    await databaseService.saveFluencyTable(roleTitle, industry, JSON.stringify(fluencyTable));
     
     console.log('Sending response...');
     res.json(fluencyTable);
@@ -223,15 +231,78 @@ app.get('/api/resources', (req, res) => {
       url: 'https://cloud.google.com/learn/responsible-ai',
       description: 'Best practices for implementing AI responsibly in organizations'
     },
-    {
-      id: '10',
-      title: 'AI for Business Leaders',
-      type: 'course',
-      difficulty: 'beginner-intermediate',
-      estimatedTime: 5,
-      url: 'https://www.coursera.org/learn/ai-for-business',
-      description: 'How AI can transform business operations and strategy'
-    }
+        {
+          id: '10',
+          title: 'AI for Business Leaders',
+          type: 'course',
+          difficulty: 'beginner-intermediate',
+          estimatedTime: 5,
+          url: 'https://www.coursera.org/learn/ai-for-business',
+          description: 'How AI can transform business operations and strategy'
+        },
+        {
+          id: '11',
+          title: 'MCP (Model Context Protocol) Documentation',
+          type: 'documentation',
+          difficulty: 'intermediate',
+          estimatedTime: 2,
+          url: 'https://modelcontextprotocol.io/',
+          description: 'Official documentation for MCP - a protocol for AI models to access external data and tools'
+        },
+        {
+          id: '12',
+          title: 'Building MCP Servers',
+          type: 'tutorial',
+          difficulty: 'intermediate-advanced',
+          estimatedTime: 4,
+          url: 'https://modelcontextprotocol.io/docs/servers',
+          description: 'Learn how to build custom MCP servers to extend AI model capabilities'
+        },
+        {
+          id: '13',
+          title: 'MCP Client Integration',
+          type: 'guide',
+          difficulty: 'intermediate',
+          estimatedTime: 3,
+          url: 'https://modelcontextprotocol.io/docs/clients',
+          description: 'How to integrate MCP clients into your AI applications'
+        },
+        {
+          id: '14',
+          title: 'MCP GitHub Repository',
+          type: 'repository',
+          difficulty: 'intermediate',
+          estimatedTime: 2,
+          url: 'https://github.com/modelcontextprotocol',
+          description: 'Official MCP GitHub repository with examples and implementations'
+        },
+        {
+          id: '15',
+          title: 'MCP Server Examples',
+          type: 'examples',
+          difficulty: 'intermediate',
+          estimatedTime: 3,
+          url: 'https://github.com/modelcontextprotocol/servers',
+          description: 'Collection of example MCP servers for various use cases'
+        },
+        {
+          id: '16',
+          title: 'MCP Best Practices',
+          type: 'guide',
+          difficulty: 'intermediate-advanced',
+          estimatedTime: 2,
+          url: 'https://modelcontextprotocol.io/docs/best-practices',
+          description: 'Best practices for building and deploying MCP servers'
+        },
+        {
+          id: '17',
+          title: 'MCP Security Guide',
+          type: 'guide',
+          difficulty: 'intermediate',
+          estimatedTime: 2,
+          url: 'https://modelcontextprotocol.io/docs/security',
+          description: 'Security considerations and best practices for MCP implementations'
+        }
   ]);
 });
 
@@ -240,8 +311,20 @@ app.post('/api/resources/recommendations', validateRequest(resourceRecommendatio
   try {
     const { roleTitle, industry, currentLevel } = (req as any).validatedData;
     
+    // Check database first
+    const cached = await databaseService.getResourceRecommendations(roleTitle, industry, currentLevel);
+    if (cached) {
+      console.log('✅ Serving resource recommendations from database cache');
+      const recommendations = JSON.parse(cached.response);
+      return res.json({ ...recommendations, cached: true });
+    }
+
+    console.log('🔄 Not found in database, generating with OpenAI...');
     // Generate with OpenAI
     const recommendations = await openaiService.generateResourceRecommendations(roleTitle, industry, currentLevel);
+    
+    // Save to database for future use
+    await databaseService.saveResourceRecommendations(roleTitle, industry, currentLevel, JSON.stringify(recommendations));
     
     res.json(recommendations);
   } catch (error) {
@@ -258,8 +341,20 @@ app.post('/api/learning-path', validateRequest(learningPathSchema), async (req, 
   try {
     const { roleTitle, industry, currentLevel, targetLevel } = (req as any).validatedData;
     
+    // Check database first
+    const cached = await databaseService.getLearningPath(roleTitle, industry, currentLevel, targetLevel);
+    if (cached) {
+      console.log('✅ Serving learning path from database cache');
+      const learningPath = JSON.parse(cached.response);
+      return res.json({ ...learningPath, cached: true });
+    }
+
+    console.log('🔄 Not found in database, generating with OpenAI...');
     // Generate with OpenAI
     const learningPath = await openaiService.generateLearningPath(roleTitle, industry, currentLevel, targetLevel);
+    
+    // Save to database for future use
+    await databaseService.saveLearningPath(roleTitle, industry, currentLevel, targetLevel, JSON.stringify(learningPath));
     
     res.json(learningPath);
   } catch (error) {
@@ -279,6 +374,25 @@ app.post('/api/bookmarks', validateRequest(bookmarkSchema), (req, res) => {
     message: 'Resource bookmarked successfully',
     bookmarkId: `bookmark_${Date.now()}`
   });
+});
+
+// Database management endpoints
+app.get('/api/database/stats', async (req, res) => {
+  try {
+    const stats = await databaseService.getDatabaseStats();
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get database stats' });
+  }
+});
+
+app.delete('/api/database/clear', async (req, res) => {
+  try {
+    await databaseService.clearAllData();
+    res.json({ message: 'Database cleared successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to clear database' });
+  }
 });
 
 // Error handling middleware

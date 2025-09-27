@@ -38,11 +38,7 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 
-interface Role {
-  id: string;
-  title: string;
-  industry: string;
-}
+// No longer need Role interface since we're using free form search
 
 interface Industry {
   name: string;
@@ -75,9 +71,8 @@ interface Resource {
 }
 
 const AIFluencyDashboard: React.FC = () => {
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [jobTitle, setJobTitle] = useState<string>('');
   const [selectedIndustry, setSelectedIndustry] = useState<string>('');
-  const [roles, setRoles] = useState<Role[]>([]);
   const [industries, setIndustries] = useState<string[]>([]);
   const [fluencyTable, setFluencyTable] = useState<FluencyTable | null>(null);
   const [resources, setResources] = useState<Resource[]>([]);
@@ -89,13 +84,11 @@ const AIFluencyDashboard: React.FC = () => {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const [rolesResponse, industriesResponse, resourcesResponse] = await Promise.all([
-          axios.get('/api/roles'),
+        const [industriesResponse, resourcesResponse] = await Promise.all([
           axios.get('/api/industries'),
           axios.get('/api/resources')
         ]);
         
-        setRoles(rolesResponse.data);
         setIndustries(industriesResponse.data);
         setResources(resourcesResponse.data);
       } catch (err) {
@@ -107,41 +100,32 @@ const AIFluencyDashboard: React.FC = () => {
     loadInitialData();
   }, []);
 
-  // Reset table when role or industry changes
+  // Reset table when job title or industry changes
   useEffect(() => {
     if (fluencyTable) {
       setFluencyTable(null);
       setHasAttemptedGeneration(false);
       setError(null);
     }
-  }, [selectedRole, selectedIndustry]);
+  }, [jobTitle, selectedIndustry]);
 
   const generateFluencyTable = async () => {
-    if (!selectedRole || !selectedIndustry) return;
+    if (!jobTitle.trim() || !selectedIndustry) return;
 
     setLoading(true);
     setError(null);
     setHasAttemptedGeneration(true);
 
     try {
-      // Try AI-powered generation first
+      // Generate with AI using free form job title
       const response = await axios.post('/api/fluency-table', {
-        roleTitle: selectedRole.title,
+        roleTitle: jobTitle.trim(),
         industry: selectedIndustry
       });
       setFluencyTable(response.data);
     } catch (err) {
-      console.warn('AI generation failed, falling back to mock data:', err);
-      try {
-        // Fallback to mock data
-        const fallbackResponse = await axios.get(
-          `/api/fluency-table/${selectedRole.id}/${selectedIndustry}`
-        );
-        setFluencyTable(fallbackResponse.data);
-      } catch (fallbackErr) {
-        setError('Failed to generate fluency table');
-        console.error('Error generating table:', fallbackErr);
-      }
+      setError('Failed to generate fluency table');
+      console.error('Error generating table:', err);
     } finally {
       setLoading(false);
     }
@@ -193,32 +177,15 @@ const AIFluencyDashboard: React.FC = () => {
         <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={12} md={6}>
-              <Autocomplete
-                options={roles}
-                getOptionLabel={(option) => option.title}
-                value={selectedRole}
-                onChange={(_, newValue) => setSelectedRole(newValue)}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Search for your job title"
-                    placeholder="e.g., Software Engineer, Marketing Manager"
-                    InputProps={{
-                      ...params.InputProps,
-                      startAdornment: <SearchIcon sx={{ mr: 1, color: 'action.active' }} />
-                    }}
-                  />
-                )}
-                renderOption={(props, option) => (
-                  <Box component="li" {...props}>
-                    <Box>
-                      <Typography variant="body1">{option.title}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {option.industry}
-                      </Typography>
-                    </Box>
-                  </Box>
-                )}
+              <TextField
+                fullWidth
+                label="Your Job Title"
+                placeholder="e.g., Software Engineer, Data Scientist, Marketing Manager..."
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'action.active' }} />
+                }}
               />
             </Grid>
             <Grid item xs={12} md={4}>
@@ -242,7 +209,7 @@ const AIFluencyDashboard: React.FC = () => {
                 variant="contained"
                 fullWidth
                 onClick={generateFluencyTable}
-                disabled={!selectedRole || !selectedIndustry || loading}
+                disabled={!jobTitle.trim() || !selectedIndustry || loading}
                 sx={{ height: '56px' }}
               >
                 {loading ? <CircularProgress size={24} /> : 'Generate Table'}
@@ -261,9 +228,9 @@ const AIFluencyDashboard: React.FC = () => {
         {fluencyTable ? (
           <Card sx={{ mb: 4 }}>
             <CardContent>
-              <Typography variant="h5" gutterBottom>
-                AI Fluency Assessment for {selectedRole?.title} in {selectedIndustry}
-              </Typography>
+                <Typography variant="h5" gutterBottom>
+                  AI Fluency Assessment for {jobTitle} in {selectedIndustry}
+                </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 Generated on {new Date(fluencyTable.generatedAt).toLocaleDateString()}
               </Typography>
@@ -346,14 +313,14 @@ const AIFluencyDashboard: React.FC = () => {
               <Typography variant="h5" gutterBottom>
                 AI Fluency Assessment
               </Typography>
-              <Typography variant="body1" color="text.secondary" align="center" sx={{ py: 4 }}>
-                {!selectedRole || !selectedIndustry 
-                  ? 'Please select your job title and industry above, then click "Generate Table" to see your personalized AI fluency assessment.'
-                  : hasAttemptedGeneration && !fluencyTable
-                  ? 'Click "Generate Table" to create your personalized AI fluency assessment.'
-                  : `Ready to generate your AI fluency assessment for ${selectedRole.title} in ${selectedIndustry}. Click "Generate Table" to begin.`
-                }
-              </Typography>
+                <Typography variant="body1" color="text.secondary" align="center" sx={{ py: 4 }}>
+                  {!jobTitle.trim() || !selectedIndustry 
+                    ? 'Please enter your job title and select your industry above, then click "Generate Table" to see your personalized AI fluency assessment.'
+                    : hasAttemptedGeneration && !fluencyTable
+                    ? 'Click "Generate Table" to create your personalized AI fluency assessment.'
+                    : `Ready to generate your AI fluency assessment for ${jobTitle} in ${selectedIndustry}. Click "Generate Table" to begin.`
+                  }
+                </Typography>
             </CardContent>
           </Card>
         )}
