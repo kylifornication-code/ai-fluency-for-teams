@@ -6,7 +6,7 @@ import rateLimit from 'express-rate-limit';
 import { config, validateEnvironment } from './config/environment';
 import { OpenAIService } from './services/openai';
 import { DatabaseService } from './services/database';
-import { validateRequest, fluencyTableSchema, resourceRecommendationsSchema, learningPathSchema, bookmarkSchema } from './validation/schemas';
+import { validateRequest, fluencyTableSchema } from './validation/schemas';
 
 // Validate environment variables
 validateEnvironment();
@@ -54,10 +54,7 @@ app.post('/api/test-fluency', async (req, res) => {
   }
 });
 
-// MVP API routes - Job titles are now free form, no predefined list needed
-app.get('/api/roles', (req, res) => {
-  res.json([]); // Empty array since we're using free form search
-});
+// Note: /api/roles removed - using free form job title input
 
 app.get('/api/industries', (req, res) => {
   res.json([
@@ -75,12 +72,13 @@ app.get('/api/industries', (req, res) => {
 // AI-powered fluency table generation
 app.post('/api/fluency-table', validateRequest(fluencyTableSchema), async (req, res) => {
   try {
-    const { roleTitle, industry } = (req as any).validatedData;
+    const { roleTitle, industry, context } = (req as any).validatedData;
     
-    console.log(`Generating fluency table for ${roleTitle} in ${industry}`);
+    const contextInfo = context ? ` with context "${context.substring(0, 50)}..."` : '';
+    console.log(`Generating fluency table for ${roleTitle} in ${industry}${contextInfo}`);
     
     // Check database first
-    const cached = await databaseService.getFluencyTable(roleTitle, industry);
+    const cached = await databaseService.getFluencyTable(roleTitle, industry, context);
     if (cached) {
       console.log('✅ Serving from database cache');
       const fluencyTable = JSON.parse(cached.response);
@@ -89,10 +87,10 @@ app.post('/api/fluency-table', validateRequest(fluencyTableSchema), async (req, 
 
     console.log('🔄 Not found in database, generating with OpenAI...');
     // Generate with OpenAI
-    const fluencyTable = await openaiService.generateFluencyTable(roleTitle, industry);
+    const fluencyTable = await openaiService.generateFluencyTable(roleTitle, industry, context);
     
     // Save to database for future use
-    await databaseService.saveFluencyTable(roleTitle, industry, JSON.stringify(fluencyTable));
+    await databaseService.saveFluencyTable(roleTitle, industry, JSON.stringify(fluencyTable), context);
     
     console.log('Sending response...');
     res.json(fluencyTable);
@@ -306,94 +304,14 @@ app.get('/api/resources', (req, res) => {
   ]);
 });
 
-// AI-powered resource recommendations
-app.post('/api/resources/recommendations', validateRequest(resourceRecommendationsSchema), async (req, res) => {
-  try {
-    const { roleTitle, industry, currentLevel } = (req as any).validatedData;
-    
-    // Check database first
-    const cached = await databaseService.getResourceRecommendations(roleTitle, industry, currentLevel);
-    if (cached) {
-      console.log('✅ Serving resource recommendations from database cache');
-      const recommendations = JSON.parse(cached.response);
-      return res.json({ ...recommendations, cached: true });
-    }
+// Note: /api/resources/recommendations removed - not used by frontend
 
-    console.log('🔄 Not found in database, generating with OpenAI...');
-    // Generate with OpenAI
-    const recommendations = await openaiService.generateResourceRecommendations(roleTitle, industry, currentLevel);
-    
-    // Save to database for future use
-    await databaseService.saveResourceRecommendations(roleTitle, industry, currentLevel, JSON.stringify(recommendations));
-    
-    res.json(recommendations);
-  } catch (error) {
-    console.error('Error generating resource recommendations:', error);
-    res.status(500).json({ 
-      error: 'Failed to generate resource recommendations',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
-
-// AI-powered learning path generation
-app.post('/api/learning-path', validateRequest(learningPathSchema), async (req, res) => {
-  try {
-    const { roleTitle, industry, currentLevel, targetLevel } = (req as any).validatedData;
-    
-    // Check database first
-    const cached = await databaseService.getLearningPath(roleTitle, industry, currentLevel, targetLevel);
-    if (cached) {
-      console.log('✅ Serving learning path from database cache');
-      const learningPath = JSON.parse(cached.response);
-      return res.json({ ...learningPath, cached: true });
-    }
-
-    console.log('🔄 Not found in database, generating with OpenAI...');
-    // Generate with OpenAI
-    const learningPath = await openaiService.generateLearningPath(roleTitle, industry, currentLevel, targetLevel);
-    
-    // Save to database for future use
-    await databaseService.saveLearningPath(roleTitle, industry, currentLevel, targetLevel, JSON.stringify(learningPath));
-    
-    res.json(learningPath);
-  } catch (error) {
-    console.error('Error generating learning path:', error);
-    res.status(500).json({ 
-      error: 'Failed to generate learning path',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
+// Note: /api/learning-path removed - not used by frontend
 
 
-app.post('/api/bookmarks', validateRequest(bookmarkSchema), (req, res) => {
-  const { resourceId, userId } = (req as any).validatedData;
-  res.json({ 
-    success: true, 
-    message: 'Resource bookmarked successfully',
-    bookmarkId: `bookmark_${Date.now()}`
-  });
-});
+// Note: /api/bookmarks removed - not used by frontend
 
-// Database management endpoints
-app.get('/api/database/stats', async (req, res) => {
-  try {
-    const stats = await databaseService.getDatabaseStats();
-    res.json(stats);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get database stats' });
-  }
-});
-
-app.delete('/api/database/clear', async (req, res) => {
-  try {
-    await databaseService.clearAllData();
-    res.json({ message: 'Database cleared successfully' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to clear database' });
-  }
-});
+// Note: Database management endpoints removed - not used by frontend
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -22,17 +22,7 @@ export interface FluencyTable {
   cached: boolean;
 }
 
-export interface ResourceRecommendation {
-  id: string;
-  title: string;
-  type: string;
-  difficulty: string;
-  estimatedTime: number;
-  url: string;
-  description: string;
-  relevanceScore: number;
-  whyRecommended: string;
-}
+// Note: ResourceRecommendation interface removed - not used
 
 export class OpenAIService {
   private static instance: OpenAIService;
@@ -47,11 +37,13 @@ export class OpenAIService {
   /**
    * Generate a personalized AI fluency table for a specific role and industry
    */
-  async generateFluencyTable(roleTitle: string, industry: string): Promise<FluencyTable> {
-    const prompt = this.buildFluencyTablePrompt(roleTitle, industry);
+  async generateFluencyTable(roleTitle: string, industry: string, context?: string): Promise<FluencyTable> {
+    const prompt = this.buildFluencyTablePrompt(roleTitle, industry, context);
     
     try {
-      const completion = await openai.chat.completions.create({
+      // Determine the correct parameter based on model
+      const isGPT5 = config.openai.model.includes('gpt-5');
+      const requestParams: any = {
         model: config.openai.model,
         messages: [
           {
@@ -63,9 +55,17 @@ export class OpenAIService {
             content: prompt
           }
         ],
-        max_tokens: config.openai.maxTokens,
         temperature: config.openai.temperature,
-      });
+      };
+
+      // Use the correct parameter based on model
+      if (isGPT5) {
+        requestParams.max_completion_tokens = config.openai.maxTokens;
+      } else {
+        requestParams.max_tokens = config.openai.maxTokens;
+      }
+
+      const completion = await openai.chat.completions.create(requestParams);
 
       const response = completion.choices[0]?.message?.content;
       if (!response) {
@@ -79,92 +79,18 @@ export class OpenAIService {
     }
   }
 
-  /**
-   * Generate personalized resource recommendations
-   */
-  async generateResourceRecommendations(
-    roleTitle: string, 
-    industry: string, 
-    currentLevel: string
-  ): Promise<ResourceRecommendation[]> {
-    const prompt = this.buildResourceRecommendationPrompt(roleTitle, industry, currentLevel);
-    
-    try {
-      const completion = await openai.chat.completions.create({
-        model: config.openai.model,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an AI learning consultant. Recommend specific, actionable learning resources based on the user\'s role, industry, and current AI fluency level. Focus on practical, high-quality resources.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: config.openai.maxTokens,
-        temperature: config.openai.temperature,
-      });
+  // Note: Resource recommendations and learning path methods removed - not used
 
-      const response = completion.choices[0]?.message?.content;
-      if (!response) {
-        throw new Error('No response from OpenAI');
-      }
+  private buildFluencyTablePrompt(roleTitle: string, industry: string, context?: string): string {
+    const contextSection = context ? `
 
-      return this.parseResourceRecommendationsResponse(response);
-    } catch (error) {
-      console.error('Error generating resource recommendations:', error);
-      throw new Error('Failed to generate resource recommendations');
-    }
-  }
+ADDITIONAL CONTEXT:
+The user has provided additional context about their specific role: "${context}"
 
-  /**
-   * Generate a personalized learning path
-   */
-  async generateLearningPath(
-    roleTitle: string, 
-    industry: string, 
-    currentLevel: string,
-    targetLevel: string
-  ): Promise<{
-    path: string[];
-    timeline: string;
-    milestones: string[];
-  }> {
-    const prompt = this.buildLearningPathPrompt(roleTitle, industry, currentLevel, targetLevel);
-    
-    try {
-      const completion = await openai.chat.completions.create({
-        model: config.openai.model,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an AI learning path expert. Create structured, step-by-step learning paths that help users progress from their current AI fluency level to their target level.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: config.openai.maxTokens,
-        temperature: config.openai.temperature,
-      });
+Please incorporate this context into the fluency assessment to make it more relevant and specific to their actual responsibilities and work environment.` : '';
 
-      const response = completion.choices[0]?.message?.content;
-      if (!response) {
-        throw new Error('No response from OpenAI');
-      }
-
-      return this.parseLearningPathResponse(response);
-    } catch (error) {
-      console.error('Error generating learning path:', error);
-      throw new Error('Failed to generate learning path');
-    }
-  }
-
-  private buildFluencyTablePrompt(roleTitle: string, industry: string): string {
     return `
-Generate a comprehensive AI fluency assessment table for a ${roleTitle} in the ${industry} industry.
+Generate a comprehensive AI fluency assessment table for a ${roleTitle} in the ${industry} industry.${contextSection}
 
 Create 4 fluency levels:
 1. Unskilled - No AI knowledge or usage
@@ -182,7 +108,8 @@ Focus on practical, actionable insights specific to ${roleTitle} roles in ${indu
 - Industry-specific AI applications
 - Role-specific AI use cases
 - Common challenges and opportunities
-- Career progression implications
+- Career progression implications${context ? `
+- The specific context provided by the user` : ''}
 
 Format the response as a JSON object with this structure:
 {
@@ -199,67 +126,7 @@ Format the response as a JSON object with this structure:
 `;
   }
 
-  private buildResourceRecommendationPrompt(
-    roleTitle: string, 
-    industry: string, 
-    currentLevel: string
-  ): string {
-    return `
-Recommend 5-8 specific learning resources for a ${roleTitle} in the ${industry} industry who is currently at the "${currentLevel}" AI fluency level.
-
-Focus on:
-- Resources that help them progress to the next fluency level
-- Industry-specific AI applications
-- Role-relevant skills and tools
-- Mix of beginner-friendly and advanced resources
-
-For each resource, provide:
-- Title and description
-- Type (course, tutorial, guide, documentation, etc.)
-- Difficulty level (beginner, intermediate, advanced)
-- Estimated time to complete
-- Why it's relevant for their role and industry
-- A realistic URL (use actual learning platforms)
-
-Format as JSON array:
-[
-  {
-    "title": "Resource Title",
-    "type": "course",
-    "difficulty": "beginner",
-    "estimatedTime": 4,
-    "url": "https://example.com/resource",
-    "description": "Detailed description",
-    "relevanceScore": 0.9,
-    "whyRecommended": "Specific reason for this role/industry"
-  }
-]
-`;
-  }
-
-  private buildLearningPathPrompt(
-    roleTitle: string, 
-    industry: string, 
-    currentLevel: string,
-    targetLevel: string
-  ): string {
-    return `
-Create a personalized learning path for a ${roleTitle} in the ${industry} industry to progress from "${currentLevel}" to "${targetLevel}" AI fluency level.
-
-Include:
-- 5-7 specific learning steps
-- Realistic timeline
-- Key milestones to track progress
-- Industry-specific considerations
-
-Format as JSON:
-{
-  "path": ["step1", "step2", "step3"],
-  "timeline": "3-6 months",
-  "milestones": ["milestone1", "milestone2"]
-}
-`;
-  }
+  // Note: Resource recommendation and learning path prompt methods removed - not used
 
   private parseFluencyTableResponse(response: string, roleTitle: string, industry: string): FluencyTable {
     try {
@@ -277,41 +144,5 @@ Format as JSON:
     }
   }
 
-  private parseResourceRecommendationsResponse(response: string): ResourceRecommendation[] {
-    try {
-      const parsed = JSON.parse(response);
-      return parsed.map((resource: any, index: number) => ({
-        id: `ai-gen-${index + 1}`,
-        title: resource.title || 'Untitled Resource',
-        type: resource.type || 'guide',
-        difficulty: resource.difficulty || 'beginner',
-        estimatedTime: resource.estimatedTime || 1,
-        url: resource.url || '#',
-        description: resource.description || 'No description available',
-        relevanceScore: resource.relevanceScore || 0.5,
-        whyRecommended: resource.whyRecommended || 'Recommended for your role and industry'
-      }));
-    } catch (error) {
-      console.error('Error parsing resource recommendations response:', error);
-      throw new Error('Invalid response format from OpenAI');
-    }
-  }
-
-  private parseLearningPathResponse(response: string): {
-    path: string[];
-    timeline: string;
-    milestones: string[];
-  } {
-    try {
-      const parsed = JSON.parse(response);
-      return {
-        path: parsed.path || [],
-        timeline: parsed.timeline || '3-6 months',
-        milestones: parsed.milestones || []
-      };
-    } catch (error) {
-      console.error('Error parsing learning path response:', error);
-      throw new Error('Invalid response format from OpenAI');
-    }
-  }
+  // Note: Resource recommendation and learning path parsing methods removed - not used
 }

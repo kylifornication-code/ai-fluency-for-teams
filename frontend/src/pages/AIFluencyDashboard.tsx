@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Container,
   Typography,
   TextField,
-  Autocomplete,
   FormControl,
   InputLabel,
   Select,
@@ -27,22 +26,26 @@ import {
   AccordionSummary,
   AccordionDetails,
   Link,
-  Divider
+  Divider,
+  Fade,
+  Zoom,
+  LinearProgress,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import {
   Search as SearchIcon,
   ExpandMore as ExpandMoreIcon,
   Work as WorkIcon,
   School as SchoolIcon,
-  Link as LinkIcon
+  Link as LinkIcon,
+  AutoAwesome as AutoAwesomeIcon,
+  Edit as EditIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import axios from 'axios';
 
-// No longer need Role interface since we're using free form search
-
-interface Industry {
-  name: string;
-}
+// Note: Industry interface removed - using string array directly
 
 interface FluencyLevel {
   level: string;
@@ -70,7 +73,11 @@ interface Resource {
   description: string;
 }
 
-const AIFluencyDashboard: React.FC = () => {
+interface AIFluencyDashboardProps {
+  darkMode: boolean;
+}
+
+const AIFluencyDashboard: React.FC<AIFluencyDashboardProps> = ({ darkMode }) => {
   const [jobTitle, setJobTitle] = useState<string>('');
   const [selectedIndustry, setSelectedIndustry] = useState<string>('');
   const [industries, setIndustries] = useState<string[]>([]);
@@ -79,6 +86,10 @@ const AIFluencyDashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasAttemptedGeneration, setHasAttemptedGeneration] = useState(false);
+  const [context, setContext] = useState<string>('');
+  const [showContextInput, setShowContextInput] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const contextRef = useRef<HTMLDivElement>(null);
 
   // Load initial data
   useEffect(() => {
@@ -106,6 +117,8 @@ const AIFluencyDashboard: React.FC = () => {
       setFluencyTable(null);
       setHasAttemptedGeneration(false);
       setError(null);
+      setContext('');
+      setShowContextInput(false);
     }
   }, [jobTitle, selectedIndustry]);
 
@@ -115,20 +128,45 @@ const AIFluencyDashboard: React.FC = () => {
     setLoading(true);
     setError(null);
     setHasAttemptedGeneration(true);
+    setLoadingProgress(0);
+
+    // Simulate progress for better UX
+    const progressInterval = setInterval(() => {
+      setLoadingProgress(prev => {
+        if (prev >= 90) return prev;
+        return prev + Math.random() * 15;
+      });
+    }, 200);
 
     try {
-      // Generate with AI using free form job title
+      // Generate with AI using free form job title and optional context
       const response = await axios.post('/api/fluency-table', {
         roleTitle: jobTitle.trim(),
-        industry: selectedIndustry
+        industry: selectedIndustry,
+        context: context.trim() || undefined
       });
-      setFluencyTable(response.data);
+      
+      setLoadingProgress(100);
+      setTimeout(() => {
+        setFluencyTable(response.data);
+        setLoading(false);
+        setLoadingProgress(0);
+      }, 500);
     } catch (err) {
       setError('Failed to generate fluency table');
       console.error('Error generating table:', err);
-    } finally {
       setLoading(false);
+      setLoadingProgress(0);
+    } finally {
+      clearInterval(progressInterval);
     }
+  };
+
+  const scrollToContext = () => {
+    contextRef.current?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'center'
+    });
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -166,9 +204,20 @@ const AIFluencyDashboard: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom align="center">
-          AI Fluency Assessment
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3 }}>
+          <img 
+            src="/logo.png" 
+            alt="AI Fluency Logo" 
+            style={{ 
+              height: '80px', 
+              width: 'auto',
+              marginRight: '16px'
+            }} 
+          />
+          <Typography variant="h3" component="h1" gutterBottom>
+            AI Fluency Assessment
+          </Typography>
+        </Box>
         <Typography variant="h6" color="text.secondary" align="center" sx={{ mb: 4 }}>
           Discover your AI fluency level and find resources to improve
         </Typography>
@@ -212,7 +261,7 @@ const AIFluencyDashboard: React.FC = () => {
                 disabled={!jobTitle.trim() || !selectedIndustry || loading}
                 sx={{ height: '56px' }}
               >
-                {loading ? <CircularProgress size={24} /> : 'Generate Table'}
+                {loading ? <CircularProgress size={24} /> : 'Generate Assessment'}
               </Button>
             </Grid>
           </Grid>
@@ -231,9 +280,26 @@ const AIFluencyDashboard: React.FC = () => {
                 <Typography variant="h5" gutterBottom>
                   AI Fluency Assessment for {jobTitle} in {selectedIndustry}
                 </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Generated on {new Date(fluencyTable.generatedAt).toLocaleDateString()}
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Generated on {new Date(fluencyTable.generatedAt).toLocaleDateString()}
+                </Typography>
+                <Tooltip title="Refine this assessment with additional context">
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<EditIcon />}
+                    onClick={scrollToContext}
+                    sx={{ 
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontWeight: 500
+                    }}
+                  >
+                    Refine Assessment
+                  </Button>
+                </Tooltip>
+              </Box>
 
               <TableContainer component={Paper} variant="outlined">
                 <Table>
@@ -307,7 +373,92 @@ const AIFluencyDashboard: React.FC = () => {
               </TableContainer>
             </CardContent>
           </Card>
-        ) : (
+        ) : null}
+
+        {/* Context Enhancement Section - Only show after table is generated */}
+        {fluencyTable && (
+          <Card sx={{ mb: 4 }} ref={contextRef}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Enhance Your Assessment
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Add more context about your specific role to get a more personalized and relevant assessment.
+              </Typography>
+              
+              {!showContextInput ? (
+                <Button
+                  variant="outlined"
+                  onClick={() => setShowContextInput(true)}
+                  startIcon={<EditIcon />}
+                  sx={{ 
+                    mb: 2,
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    fontWeight: 500
+                  }}
+                >
+                  Add Context to Refine Assessment
+                </Button>
+              ) : (
+                <Fade in timeout={300}>
+                  <Box sx={{ mb: 2 }}>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={3}
+                      label="Additional Context"
+                      placeholder="e.g., I work primarily with cloud infrastructure, manage a team of 5 developers, focus on security compliance, use AWS and Kubernetes daily..."
+                      value={context}
+                      onChange={(e) => setContext(e.target.value)}
+                      helperText="Describe your specific responsibilities, team size, technologies you use, or any other relevant details"
+                      sx={{ 
+                        mb: 2,
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                        }
+                      }}
+                    />
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Button
+                        variant="contained"
+                        onClick={generateFluencyTable}
+                        disabled={loading}
+                        startIcon={loading ? <CircularProgress size={20} /> : <RefreshIcon />}
+                        sx={{ 
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          fontWeight: 500,
+                          background: darkMode 
+                            ? 'linear-gradient(45deg, #90caf9 30%, #f48fb1 90%)'
+                            : 'linear-gradient(45deg, #1976d2 30%, #dc004e 90%)',
+                        }}
+                      >
+                        {loading ? 'Regenerating...' : 'Regenerate with Context'}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        onClick={() => {
+                          setShowContextInput(false);
+                          setContext('');
+                        }}
+                        sx={{ 
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          fontWeight: 500
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </Box>
+                  </Box>
+                </Fade>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {!fluencyTable && (
           <Card sx={{ mb: 4 }}>
             <CardContent>
               <Typography variant="h5" gutterBottom>
@@ -326,69 +477,121 @@ const AIFluencyDashboard: React.FC = () => {
         )}
 
         {/* Learning Resources */}
-        <Card>
-          <CardContent>
-            <Typography variant="h5" gutterBottom>
-              Learning Resources
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Curated resources to help you improve your AI fluency
-            </Typography>
+        <Zoom in timeout={1000}>
+          <Card 
+            elevation={0}
+            sx={{ 
+              background: darkMode 
+                ? 'linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%)'
+                : 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+              border: '1px solid',
+              borderColor: darkMode ? '#333' : '#e0e0e0',
+            }}
+          >
+            <CardContent sx={{ p: 4 }}>
+              <Typography 
+                variant="h5" 
+                gutterBottom
+                sx={{ 
+                  fontWeight: 600,
+                  mb: 1
+                }}
+              >
+                Learning Resources
+              </Typography>
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                sx={{ mb: 4 }}
+              >
+                Curated resources to help you improve your AI fluency
+              </Typography>
 
-            <Grid container spacing={2}>
-              {resources.map((resource) => (
-                <Grid item xs={12} md={6} key={resource.id}>
-                  <Accordion>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                        <Box sx={{ mr: 2, color: 'primary.main' }}>
-                          {getTypeIcon(resource.type)}
-                        </Box>
-                        <Box sx={{ flexGrow: 1 }}>
-                          <Typography variant="h6">{resource.title}</Typography>
-                          <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
-                            <Chip
-                              label={resource.type}
-                              size="small"
-                              variant="outlined"
-                            />
-                            <Chip
-                              label={resource.difficulty}
-                              size="small"
-                              color={getDifficultyColor(resource.difficulty) as any}
-                            />
-                            <Chip
-                              label={`${resource.estimatedTime}h`}
-                              size="small"
-                              variant="outlined"
-                            />
-                          </Box>
-                        </Box>
-                      </Box>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography variant="body2" sx={{ mb: 2 }}>
-                        {resource.description}
-                      </Typography>
-                      <Divider sx={{ my: 1 }} />
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <LinkIcon fontSize="small" color="action" />
-                        <Link
-                          href={resource.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          variant="body2"
+              <Grid container spacing={3}>
+                {resources.map((resource, index) => (
+                  <Grid item xs={12} md={6} key={resource.id}>
+                    <Fade in timeout={800 + index * 100}>
+                      <Accordion
+                        sx={{
+                          borderRadius: 2,
+                          '&:before': { display: 'none' },
+                          boxShadow: darkMode 
+                            ? '0 2px 8px rgba(0,0,0,0.3)' 
+                            : '0 2px 8px rgba(0,0,0,0.1)',
+                        }}
+                      >
+                        <AccordionSummary 
+                          expandIcon={<ExpandMoreIcon />}
+                          sx={{ 
+                            borderRadius: 2,
+                            '&.Mui-expanded': {
+                              borderRadius: '8px 8px 0 0',
+                            }
+                          }}
                         >
-                          View Resource
-                        </Link>
-                      </Box>
-                    </AccordionDetails>
-                  </Accordion>
-                </Grid>
-              ))}
-            </Grid>
-          </CardContent>
-        </Card>
+                          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                            <Box sx={{ mr: 2, color: 'primary.main' }}>
+                              {getTypeIcon(resource.type)}
+                            </Box>
+                            <Box sx={{ flexGrow: 1 }}>
+                              <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                                {resource.title}
+                              </Typography>
+                              <Box sx={{ display: 'flex', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
+                                <Chip
+                                  label={resource.type}
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{ borderRadius: 1 }}
+                                />
+                                <Chip
+                                  label={resource.difficulty}
+                                  size="small"
+                                  color={getDifficultyColor(resource.difficulty) as any}
+                                  sx={{ borderRadius: 1 }}
+                                />
+                                <Chip
+                                  label={`${resource.estimatedTime}h`}
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{ borderRadius: 1 }}
+                                />
+                              </Box>
+                            </Box>
+                          </Box>
+                        </AccordionSummary>
+                        <AccordionDetails sx={{ pt: 0 }}>
+                          <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.6 }}>
+                            {resource.description}
+                          </Typography>
+                          <Divider sx={{ my: 2 }} />
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <LinkIcon fontSize="small" color="action" />
+                            <Link
+                              href={resource.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              variant="body2"
+                              sx={{ 
+                                fontWeight: 500,
+                                textDecoration: 'none',
+                                '&:hover': {
+                                  textDecoration: 'underline'
+                                }
+                              }}
+                            >
+                              View Resource
+                            </Link>
+                          </Box>
+                        </AccordionDetails>
+                      </Accordion>
+                    </Fade>
+                  </Grid>
+                ))}
+              </Grid>
+            </CardContent>
+          </Card>
+        </Zoom>
       </Box>
     </Container>
   );
