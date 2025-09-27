@@ -1,31 +1,62 @@
-# AI Fluency for Teams - MVP
+# AI Fluency for Teams
 
-A web application that provides personalized AI fluency assessments and learning resources based on job roles and industries.
+A comprehensive web application that provides personalized AI fluency assessments and learning resources based on job roles and industries. Built with modern technologies and powered by OpenAI's GPT-4.1 model.
 
-## Features
+## ✨ Features
 
-- **Role Selection**: Choose from various job roles
-- **Industry Selection**: Select your industry context
-- **AI Fluency Table**: Generate personalized fluency levels (Unacceptable → Capable → Adoptive → Transformative)
-- **Learning Resources**: Browse and bookmark learning materials
-- **Responsive Design**: Works on desktop, tablet, and mobile
+- **🤖 AI-Powered Assessments**: Generate personalized fluency tables using OpenAI GPT-4.1
+- **🎯 Role-Based Analysis**: Customized assessments for specific job roles and industries
+- **📊 Fluency Levels**: Four-tier system (Unskilled → Capable → Adoptive → Transformative)
+- **📚 Curated Resources**: 17+ high-quality learning resources and tools
+- **💾 Smart Caching**: Database caching for cost optimization and performance
+- **🎨 Modern UI**: Beautiful, responsive design with dark/light mode
+- **⚡ Real-time Generation**: Instant fluency table generation with progress indicators
+- **🔍 Context-Aware**: Additional context input for more personalized assessments
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Frontend**: React + TypeScript + Material-UI + Vite
+- **Frontend**: React 18 + TypeScript + Material-UI + Vite
 - **Backend**: Node.js + Express + TypeScript
-- **Database**: PostgreSQL (planned)
-- **Cache**: Redis (planned)
+- **AI Integration**: OpenAI GPT-4.1 API
+- **Database**: SQLite (with PostgreSQL migration path)
+- **Caching**: In-memory with database persistence
 - **Containerization**: Docker + Docker Compose
+- **Development**: Hot reload, TypeScript, ESLint
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ 
-- Docker and Docker Compose (for containerized setup)
+- **Node.js 18+**
+- **OpenAI API Key** (required for AI functionality)
+- **Docker and Docker Compose** (optional, for containerized setup)
 
-### Option 1: Local Development (without Docker)
+### 🎯 One-Command Setup
+
+1. **Clone and setup**:
+   ```bash
+   git clone <repository-url>
+   cd AI-Fluency-for-Teams
+   chmod +x start-app.sh
+   ```
+
+2. **Configure OpenAI** (if not already done):
+   ```bash
+   ./setup-openai.sh
+   # Follow the prompts to add your OpenAI API key
+   ```
+
+3. **Start the application**:
+   ```bash
+   ./start-app.sh
+   ```
+
+4. **Access the application**:
+   - **Frontend**: http://localhost:3000
+   - **Backend API**: http://localhost:5001
+   - **Health Check**: http://localhost:5001/health
+
+### 🔧 Manual Setup (Alternative)
 
 1. **Install dependencies**:
    ```bash
@@ -38,23 +69,25 @@ A web application that provides personalized AI fluency assessments and learning
    npm install
    ```
 
-2. **Start the backend**:
+2. **Configure environment**:
    ```bash
-   cd backend
-   npm run dev
+   # Copy and edit environment file
+   cp backend/env.example backend/.env
+   # Add your OpenAI API key to backend/.env
    ```
 
-3. **Start the frontend** (in a new terminal):
+3. **Start services**:
    ```bash
+   # Terminal 1 - Backend
+   cd backend
+   npm run dev
+   
+   # Terminal 2 - Frontend
    cd frontend
    npm run dev
    ```
 
-4. **Access the application**:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5000
-
-### Option 2: Docker Development
+### 🐳 Docker Setup (Optional)
 
 1. **Start all services**:
    ```bash
@@ -63,70 +96,155 @@ A web application that provides personalized AI fluency assessments and learning
 
 2. **Access the application**:
    - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5000
+   - Backend API: http://localhost:5001
 
-## API Endpoints
+## 🔌 API Endpoints
 
-- `GET /health` - Health check
-- `GET /api/roles` - Get available job roles
+### Core Endpoints
+- `GET /health` - Health check and system status
 - `GET /api/industries` - Get available industries
-- `GET /api/fluency-table/:roleId/:industry` - Generate fluency table
-- `GET /api/resources` - Get learning resources
-- `POST /api/bookmarks` - Bookmark a resource
+- `GET /api/resources` - Get curated learning resources (17+ resources)
 
-## Project Structure
+### AI Fluency Generation
+- `POST /api/fluency-table` - Generate personalized fluency table
+  - **Body**: `{ "roleTitle": "string", "industry": "string", "context": "string" }`
+  - **Response**: Complete fluency table with 4 levels
+- `GET /api/fluency-table/:roleId/:industry` - Get cached fluency table
+
+### Development & Testing
+- `POST /api/test-fluency` - Test OpenAI integration (development only)
+
+## 📁 Project Structure
 
 ```
-├── frontend/                 # React frontend application
+├── frontend/                    # React frontend application
 │   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   ├── pages/          # Page components
-│   │   ├── services/       # API service layer
-│   │   └── types/          # TypeScript type definitions
-│   ├── public/             # Static assets
+│   │   ├── pages/              # Main page components
+│   │   │   └── AIFluencyDashboard.tsx  # Main dashboard
+│   │   ├── App.tsx             # Root component with theme
+│   │   └── main.tsx            # Application entry point
+│   ├── public/
+│   │   └── logo.png            # Application logo
+│   ├── dist/                   # Built frontend assets
 │   └── package.json
-├── backend/                 # Node.js backend API
+├── backend/                     # Node.js backend API
 │   ├── src/
-│   │   ├── routes/         # API route handlers
-│   │   ├── services/       # Business logic services
-│   │   ├── models/         # Data models
-│   │   └── middleware/     # Express middleware
-│   ├── tests/              # Backend tests
+│   │   ├── services/           # Core business logic
+│   │   │   ├── openai.ts       # OpenAI integration
+│   │   │   └── database.ts     # Database operations
+│   │   ├── config/
+│   │   │   └── environment.ts  # Environment configuration
+│   │   ├── validation/
+│   │   │   └── schemas.ts      # Request validation schemas
+│   │   ├── types/
+│   │   │   └── express.d.ts    # TypeScript declarations
+│   │   ├── index.ts            # Express server setup
+│   │   └── tests/              # Backend tests
+│   ├── data/
+│   │   └── ai_fluency.db       # SQLite database
+│   ├── dist/                   # Compiled TypeScript
 │   └── package.json
-├── docker/                 # Docker configuration
+├── docker/                     # Docker configuration
 │   └── docker-compose.dev.yml
-└── docs/                   # Documentation
+├── docs/                       # Documentation
+├── start-app.sh               # One-command startup script
+├── setup-openai.sh            # OpenAI configuration script
+├── diagnose.sh                # Troubleshooting script
+└── README.md                  # This file
 ```
 
-## Development Status
+## 🎯 Current Status
 
-### ✅ Completed (MVP)
-- [x] Project structure and configuration
-- [x] Backend API with mock data
-- [x] Frontend React application with routing
-- [x] Basic Docker setup
-- [x] Role and industry selection
-- [x] Fluency table display
-- [x] Resource browsing and bookmarking
-- [x] Basic tests
+### ✅ Completed Features
+- [x] **Full-Stack Application**: React frontend + Node.js backend
+- [x] **OpenAI Integration**: GPT-4.1 powered fluency assessments
+- [x] **Database Caching**: SQLite with intelligent caching system
+- [x] **Modern UI**: Material-UI with dark/light mode support
+- [x] **Role-Based Assessments**: Personalized fluency tables
+- [x] **Learning Resources**: 17+ curated resources and tools
+- [x] **Context-Aware**: Additional context input for personalization
+- [x] **Responsive Design**: Works on all device sizes
+- [x] **Logo Integration**: Professional branding
+- [x] **One-Command Setup**: Automated startup scripts
+- [x] **Error Handling**: Comprehensive error management
+- [x] **Rate Limiting**: API protection and optimization
 
-### 🚧 Next Steps
-- [ ] Database integration (PostgreSQL)
-- [ ] Redis caching
-- [ ] OpenAI API integration
-- [ ] User authentication
-- [ ] Advanced search and filtering
-- [ ] Performance optimization
-- [ ] Comprehensive testing
+### 🚀 Recent Updates
+- **GPT-4.1 Integration**: Latest AI model for enhanced assessments
+- **Smart Caching**: Database persistence for cost optimization
+- **Logo Integration**: Professional branding throughout the app
+- **Improved UI**: Enhanced user experience with animations
+- **Better Error Handling**: More informative error messages
 
-## Contributing
+### 🔮 Future Enhancements
+- [ ] **User Authentication**: Login and user profiles
+- [ ] **Progress Tracking**: Learning journey monitoring
+- [ ] **Advanced Analytics**: Usage insights and metrics
+- [ ] **Export Features**: PDF/CSV export capabilities
+- [ ] **Team Features**: Collaborative assessments
+- [ ] **Mobile App**: Native mobile application
+- [ ] **API Rate Optimization**: Advanced caching strategies
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+## 🛠️ Development
 
-## License
+### Environment Variables
+Create a `.env` file in the `backend/` directory:
+```bash
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_MODEL=gpt-4.1
+OPENAI_MAX_TOKENS=2000
+OPENAI_TEMPERATURE=0.7
+PORT=5001
+NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
+```
 
-MIT License
+### Available Scripts
+```bash
+# Start the application
+./start-app.sh
+
+# Setup OpenAI integration
+./setup-openai.sh
+
+# Diagnose issues
+./diagnose.sh
+
+# Backend development
+cd backend && npm run dev
+
+# Frontend development
+cd frontend && npm run dev
+
+# Build for production
+cd backend && npm run build
+cd frontend && npm run build
+```
+
+## 🤝 Contributing
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Make your changes**: Follow the existing code style
+4. **Add tests**: Ensure your changes are tested
+5. **Commit changes**: `git commit -m 'Add amazing feature'`
+6. **Push to branch**: `git push origin feature/amazing-feature`
+7. **Submit a pull request**
+
+### Development Guidelines
+- Follow TypeScript best practices
+- Use Material-UI components for consistency
+- Add proper error handling
+- Include JSDoc comments for complex functions
+- Test your changes thoroughly
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **OpenAI** for providing the GPT-4.1 API
+- **Material-UI** for the beautiful component library
+- **React** and **TypeScript** communities for excellent tooling
+- **Vite** for fast development experience

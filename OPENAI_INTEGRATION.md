@@ -1,27 +1,27 @@
 # OpenAI Integration Guide
 
-This guide explains how to set up and use the OpenAI integration for AI Fluency for Teams.
+This guide explains how to set up and use the OpenAI GPT-4.1 integration for AI Fluency for Teams.
 
 ## 🚀 Quick Start
 
-1. **Run the setup script:**
-   ```bash
-   ./setup-openai.sh
-   ```
-
-2. **Get your OpenAI API key:**
+1. **Get your OpenAI API key:**
    - Visit [OpenAI API Keys](https://platform.openai.com/api-keys)
    - Create a new API key
    - Copy the key
 
-3. **Configure your environment:**
+2. **Configure your environment:**
    - Open `backend/.env`
    - Replace `your_openai_api_key_here` with your actual API key
+   - Ensure `OPENAI_MODEL=gpt-4.1` is set
 
-4. **Start the application:**
+3. **Start the application:**
    ```bash
    ./start-app.sh
    ```
+
+4. **Access the application:**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5001
 
 ## 🔧 Features
 
@@ -31,23 +31,24 @@ This guide explains how to set up and use the OpenAI integration for AI Fluency 
 - **Industry Context**: Content is tailored to the specific industry context
 - **Real-world Examples**: Practical examples that users can relate to
 
-### Intelligent Resource Recommendations
-- **Personalized Suggestions**: Resources are recommended based on role, industry, and current fluency level
-- **Relevance Scoring**: Each recommendation includes a relevance score and explanation
-- **Progressive Learning**: Resources help users progress to the next fluency level
-- **Quality Curation**: Focus on high-quality, actionable resources
+### Curated Learning Resources
+- **17+ High-Quality Resources**: Curated collection of learning materials
+- **Multiple Categories**: Courses, tutorials, documentation, guides
+- **Difficulty Levels**: Beginner to advanced resources
+- **Time Estimates**: Clear time commitments for each resource
+- **Direct Links**: Easy access to external learning materials
 
-### Custom Learning Paths
-- **Step-by-step Guidance**: Structured learning paths from current to target fluency level
-- **Timeline Estimates**: Realistic timelines for skill development
-- **Milestone Tracking**: Clear milestones to measure progress
-- **Industry-specific Considerations**: Paths consider industry-specific requirements
+### Context-Aware Assessments
+- **Additional Context Input**: Users can provide specific role context
+- **Personalized Prompts**: AI generates content based on user context
+- **Industry-Specific Examples**: Real-world examples relevant to user's industry
+- **Role-Specific Criteria**: Assessment criteria tailored to specific job roles
 
-### Smart Caching
+### Database Caching
 - **Cost Optimization**: Reduces API calls by caching generated content
 - **Performance**: Faster response times for cached content
-- **Configurable TTL**: Adjustable cache expiration times
-- **Redis Integration**: Scalable caching with Redis
+- **SQLite Integration**: Lightweight database caching system
+- **Automatic Cache Management**: Intelligent cache expiration and cleanup
 
 ## 🛠️ Configuration
 
@@ -58,7 +59,7 @@ Create a `.env` file in the `backend/` directory:
 ```env
 # OpenAI Configuration
 OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-4
+OPENAI_MODEL=gpt-4.1
 OPENAI_MAX_TOKENS=2000
 OPENAI_TEMPERATURE=0.7
 
@@ -67,10 +68,6 @@ NODE_ENV=development
 PORT=5001
 FRONTEND_URL=http://localhost:3000
 
-# Caching Configuration
-REDIS_URL=redis://localhost:6379
-CACHE_TTL=3600
-
 # Security
 JWT_SECRET=your_jwt_secret_here
 API_RATE_LIMIT=100
@@ -78,14 +75,17 @@ API_RATE_LIMIT=100
 
 ### OpenAI Model Configuration
 
-- **Model**: `gpt-4` (recommended) or `gpt-3.5-turbo` (faster, cheaper)
+- **Model**: `gpt-4.1` (current default) - supports both `max_tokens` and `max_completion_tokens`
 - **Max Tokens**: `2000` (adjust based on your needs)
 - **Temperature**: `0.7` (balance between creativity and consistency)
+- **Auto-Detection**: Automatically uses correct parameters for GPT-4 vs GPT-5 models
 
-### Caching Configuration
+### Database Caching Configuration
 
-- **TTL**: `3600` seconds (1 hour) - how long to cache generated content
-- **Redis**: Required for caching (fallback to memory if unavailable)
+- **SQLite Database**: `backend/data/ai_fluency.db`
+- **Automatic Caching**: Generated fluency tables are automatically cached
+- **Cache Persistence**: Database persists between application restarts
+- **No Additional Setup**: No Redis or external dependencies required
 
 ## 📡 API Endpoints
 
@@ -98,46 +98,44 @@ Content-Type: application/json
 
 {
   "roleTitle": "Software Engineer",
-  "industry": "Technology"
-}
-```
-
-#### Get Resource Recommendations
-```http
-POST /api/resources/recommendations
-Content-Type: application/json
-
-{
-  "roleTitle": "Software Engineer",
   "industry": "Technology",
-  "currentLevel": "Capable"
+  "context": "I work on React applications and use AI tools for code generation"
 }
 ```
 
-#### Generate Learning Path
-```http
-POST /api/learning-path
-Content-Type: application/json
+**Response**: Complete fluency table with 4 levels (Unskilled → Capable → Adoptive → Transformative)
 
-{
-  "roleTitle": "Software Engineer",
-  "industry": "Technology",
-  "currentLevel": "Capable",
-  "targetLevel": "Adoptive"
-}
+#### Get Cached Fluency Table
+```http
+GET /api/fluency-table/:roleId/:industry
 ```
 
-### Cache Management
+**Example**: `GET /api/fluency-table/software-engineer/technology`
 
-#### Get Cache Statistics
+### Resource Endpoints
+
+#### Get Learning Resources
 ```http
-GET /api/cache/stats
+GET /api/resources
 ```
 
-#### Clear Cache
+**Response**: Array of 17+ curated learning resources with metadata
+
+#### Get Industries
 ```http
-DELETE /api/cache
+GET /api/industries
 ```
+
+**Response**: Array of available industries
+
+### Health Check
+
+#### Application Status
+```http
+GET /health
+```
+
+**Response**: Application health status and timestamp
 
 ## 🔒 Security Features
 
@@ -158,20 +156,46 @@ DELETE /api/cache
 
 ## 💰 Cost Management
 
-### Caching Strategy
-- **Intelligent Caching**: Cache generated content to reduce API calls
-- **TTL Management**: Configurable cache expiration
-- **Cache Keys**: Structured cache keys for efficient retrieval
+### Database Caching Strategy
+- **Automatic Caching**: All generated fluency tables are automatically cached
+- **Persistent Storage**: SQLite database persists between application restarts
+- **Cache Hit Optimization**: Identical role/industry combinations served from cache
+- **Cost Reduction**: Significant reduction in OpenAI API calls through intelligent caching
 
 ### API Optimization
 - **Prompt Engineering**: Optimized prompts for better results with fewer tokens
 - **Response Parsing**: Efficient JSON parsing and validation
 - **Error Handling**: Graceful fallbacks to reduce unnecessary API calls
+- **Model Compatibility**: Automatic parameter detection for GPT-4 vs GPT-5 models
 
-### Monitoring
-- **Cache Statistics**: Monitor cache hit rates and memory usage
-- **API Usage**: Track API calls and costs
-- **Performance Metrics**: Monitor response times and error rates
+### Performance Monitoring
+- **Database Statistics**: Monitor cache hit rates and database performance
+- **API Usage**: Track OpenAI API calls and costs
+- **Response Times**: Monitor fluency table generation performance
+- **Error Tracking**: Comprehensive error logging and monitoring
+
+## 🎯 Current Implementation Status
+
+### ✅ Completed Features
+- **GPT-4.1 Integration**: Full support for OpenAI GPT-4.1 model
+- **Database Caching**: SQLite-based caching system for cost optimization
+- **Context-Aware Generation**: Support for additional user context input
+- **Logo Integration**: Professional branding throughout the application
+- **Modern UI**: Material-UI with dark/light mode support
+- **One-Command Setup**: `./start-app.sh` for instant application startup
+
+### 🔧 Technical Implementation
+- **Model Compatibility**: Automatic detection of GPT-4 vs GPT-5 parameter requirements
+- **Error Handling**: Comprehensive error management and user feedback
+- **Rate Limiting**: API protection with configurable limits
+- **Input Validation**: Joi schemas for request validation
+- **Security**: CORS, helmet, and input sanitization
+
+### 📊 Performance Metrics
+- **Cache Hit Rate**: High cache hit rate for repeated role/industry combinations
+- **Response Time**: Fast response times for cached content
+- **Cost Optimization**: Significant reduction in OpenAI API costs through caching
+- **Reliability**: Robust error handling and fallback mechanisms
 
 ## 🚨 Troubleshooting
 
@@ -183,11 +207,11 @@ DELETE /api/cache
 ```
 **Solution**: Add your API key to `backend/.env`
 
-#### Redis Connection Failed
+#### Database Connection Failed
 ```
-Redis connection error: connect ECONNREFUSED
+Database connection error: SQLITE_CANTOPEN
 ```
-**Solution**: Start Redis with `docker run -d --name ai-fluency-redis -p 6379:6379 redis:7-alpine`
+**Solution**: Ensure the `backend/data/` directory exists and is writable. The database will be created automatically on first run.
 
 #### Rate Limit Exceeded
 ```
