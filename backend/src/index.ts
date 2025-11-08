@@ -42,17 +42,19 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Simple test endpoint for debugging
-app.post('/api/test-fluency', async (req, res) => {
-  try {
-    console.log('Test endpoint called');
-    const fluencyTable = await openaiService.generateFluencyTable('Software Engineer', 'Technology');
-    res.json(fluencyTable);
-  } catch (error) {
-    console.error('Test endpoint error:', error);
-    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
-  }
-});
+// Simple test endpoint for debugging - only available in development
+if (config.app.nodeEnv === 'development') {
+  app.post('/api/test-fluency', async (req, res) => {
+    try {
+      console.log('Test endpoint called');
+      const fluencyTable = await openaiService.generateFluencyTable('Software Engineer', 'Technology');
+      res.json(fluencyTable);
+    } catch (error) {
+      console.error('Test endpoint error:', error);
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+}
 
 // Note: /api/roles removed - using free form job title input
 
@@ -349,7 +351,12 @@ app.get('/api/resources', (req, res) => {
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
+  // Only log stack traces in development to prevent information leakage
+  if (config.app.nodeEnv === 'development') {
+    console.error('Error stack:', err.stack);
+  } else {
+    console.error('Error:', err.message);
+  }
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
