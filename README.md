@@ -87,32 +87,54 @@ A comprehensive web application that provides personalized AI fluency assessment
    npm run dev
    ```
 
-### 🐳 Docker Setup (Optional)
+### 🐳 Docker Setup (Recommended for Local Deployment)
 
-#### Development Mode
-1. **Start all services**:
+#### Quick Docker Deployment
+
+1. **Set up environment** (if not already done):
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml up --build
+   cp backend/env.example backend/.env
+   # Edit backend/.env and add your OpenAI API key
    ```
 
-2. **Test the deployment**:
+2. **Deploy with one command**:
    ```bash
-   ./test-docker.sh
+   ./docker-deploy.sh
    ```
 
 3. **Access the application**:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5001
-
-#### Production Mode
-1. **Start production services**:
-   ```bash
-   docker-compose -f docker/docker-compose.prod.yml up --build
-   ```
-
-2. **Access the application**:
    - Frontend: http://localhost:3000 (served by Nginx)
    - Backend API: http://localhost:5001
+   - Health Check: http://localhost:5001/health
+
+#### Manual Docker Deployment
+
+**Production Mode** (Recommended):
+```bash
+cd docker
+docker-compose -f docker-compose.prod.yml up --build -d
+```
+
+**Development Mode**:
+```bash
+cd docker
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+#### Docker Management Commands
+
+```bash
+# Stop services
+cd docker && docker-compose -f docker-compose.prod.yml down
+
+# View logs
+cd docker && docker-compose -f docker-compose.prod.yml logs -f
+
+# Restart services
+cd docker && docker-compose -f docker-compose.prod.yml restart
+```
+
+📚 **For detailed Docker deployment instructions, see [DOCKER_DEPLOY.md](DOCKER_DEPLOY.md)**
 
 ## 🔌 API Endpoints
 
@@ -161,11 +183,15 @@ A comprehensive web application that provides personalized AI fluency assessment
 │   ├── dist/                   # Compiled TypeScript
 │   └── package.json
 ├── docker/                     # Docker configuration
-│   └── docker-compose.dev.yml
+│   ├── docker-compose.dev.yml  # Development Docker Compose
+│   ├── docker-compose.prod.yml # Production Docker Compose
+│   └── data/                   # Persistent database storage
 ├── docs/                       # Documentation
 ├── start-app.sh               # One-command startup script
+├── docker-deploy.sh           # Docker deployment script
 ├── setup-openai.sh            # OpenAI configuration script
 ├── diagnose.sh                # Troubleshooting script
+├── DOCKER_DEPLOY.md           # Docker deployment guide
 └── README.md                  # This file
 ```
 
@@ -182,10 +208,14 @@ A comprehensive web application that provides personalized AI fluency assessment
 - [x] **Responsive Design**: Works on all device sizes
 - [x] **Logo Integration**: Professional branding
 - [x] **One-Command Setup**: Automated startup scripts
+- [x] **Docker Deployment**: Production-ready containerized deployment
 - [x] **Error Handling**: Comprehensive error management
 - [x] **Rate Limiting**: API protection and optimization
 
 ### 🚀 Recent Updates
+- **Docker Deployment**: One-command local deployment with `./docker-deploy.sh`
+- **Production Dockerfiles**: Multi-stage builds for optimized container images
+- **Docker Documentation**: Comprehensive deployment guide in `DOCKER_DEPLOY.md`
 - **GPT-4.1 Integration**: Latest AI model for enhanced assessments
 - **Smart Caching**: Database persistence for cost optimization
 - **Logo Integration**: Professional branding throughout the app
@@ -217,8 +247,11 @@ FRONTEND_URL=http://localhost:3000
 
 ### Available Scripts
 ```bash
-# Start the application
+# Start the application (local development)
 ./start-app.sh
+
+# Deploy with Docker (production-like local deployment)
+./docker-deploy.sh
 
 # Setup OpenAI integration
 ./setup-openai.sh
@@ -235,6 +268,11 @@ cd frontend && npm run dev
 # Build for production
 cd backend && npm run build
 cd frontend && npm run build
+
+# Docker management
+cd docker && docker-compose -f docker-compose.prod.yml up -d    # Start
+cd docker && docker-compose -f docker-compose.prod.yml down   # Stop
+cd docker && docker-compose -f docker-compose.prod.yml logs -f  # View logs
 ```
 
 ## 🤝 Contributing
