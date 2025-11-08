@@ -6,7 +6,7 @@ import rateLimit from 'express-rate-limit';
 import { config, validateEnvironment } from './config/environment';
 import { OpenAIService } from './services/openai';
 import { DatabaseService } from './services/database';
-import { validateRequest, fluencyTableSchema } from './validation/schemas';
+import { validateRequest, fluencyTableSchema, jobPromptsSchema } from './validation/schemas';
 
 // Validate environment variables
 validateEnvironment();
@@ -144,6 +144,40 @@ app.get('/api/fluency-table/:roleId/:industry', (req, res) => {
     generatedAt: new Date().toISOString(),
     cached: false
   });
+});
+
+// AI-powered job prompts generation
+app.post('/api/job-prompts', validateRequest(jobPromptsSchema), async (req, res) => {
+  try {
+    const { roleTitle, industry, context } = (req as any).validatedData;
+    
+    const contextInfo = context ? ` with context "${context.substring(0, 50)}..."` : '';
+    console.log(`Generating job prompts for ${roleTitle} in ${industry}${contextInfo}`);
+    
+    // Check database first
+    const cached = await databaseService.getJobPrompts(roleTitle, industry, context);
+    if (cached) {
+      console.log('✅ Serving job prompts from database cache');
+      const jobPrompts = JSON.parse(cached.response);
+      return res.json({ ...jobPrompts, cached: true });
+    }
+
+    console.log('🔄 Not found in database, generating with OpenAI...');
+    // Generate with OpenAI
+    const jobPrompts = await openaiService.generateJobPrompts(roleTitle, industry, context);
+    
+    // Save to database for future use
+    await databaseService.saveJobPrompts(roleTitle, industry, JSON.stringify(jobPrompts), context);
+    
+    console.log('Sending job prompts response...');
+    res.json(jobPrompts);
+  } catch (error) {
+    console.error('Error generating job prompts:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate job prompts',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
 });
 
 app.get('/api/resources', (req, res) => {

@@ -145,4 +145,125 @@ Format the response as a JSON object with this structure:
   }
 
   // Note: Resource recommendation and learning path parsing methods removed - not used
+
+  /**
+   * Generate job-role-specific prompts organized by categories
+   */
+  async generateJobPrompts(roleTitle: string, industry: string, context?: string): Promise<JobPrompts> {
+    const prompt = this.buildJobPromptsPrompt(roleTitle, industry, context);
+    
+    try {
+      const isGPT5 = config.openai.model.includes('gpt-5');
+      const requestParams: any = {
+        model: config.openai.model,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an AI prompt engineering expert. Generate practical, useful prompts organized by categories that are specifically tailored to different job roles and industries. Focus on real-world applications and actionable prompts.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: config.openai.temperature,
+      };
+
+      if (isGPT5) {
+        requestParams.max_completion_tokens = config.openai.maxTokens;
+      } else {
+        requestParams.max_tokens = config.openai.maxTokens;
+      }
+
+      const completion = await openai.chat.completions.create(requestParams);
+
+      const response = completion.choices[0]?.message?.content;
+      if (!response) {
+        throw new Error('No response from OpenAI');
+      }
+
+      return this.parseJobPromptsResponse(response, roleTitle, industry);
+    } catch (error) {
+      console.error('Error generating job prompts:', error);
+      throw new Error('Failed to generate job prompts');
+    }
+  }
+
+  private buildJobPromptsPrompt(roleTitle: string, industry: string, context?: string): string {
+    const contextSection = context ? `
+
+ADDITIONAL CONTEXT:
+The user has provided additional context about their specific role: "${context}"
+
+Please incorporate this context into the prompt suggestions to make them more relevant and specific to their actual responsibilities and work environment.` : '';
+
+    return `
+Generate a comprehensive collection of AI prompts for a ${roleTitle} in the ${industry} industry.${contextSection}
+
+Create multiple categories of prompts (at least 4-6 categories) that would be useful for this job role. Examples of categories might include:
+- Daily Tasks & Productivity
+- Problem Solving & Analysis
+- Communication & Writing
+- Research & Learning
+- Strategy & Planning
+- Data Analysis & Reporting
+- Creative & Design
+- Technical & Development
+- Management & Leadership
+- Customer Service & Support
+
+For each category, provide:
+- A clear category name
+- A brief description of why this category is relevant for this role
+- 3-5 example prompts that are specific, actionable, and useful for this job role
+
+Focus on practical, real-world prompts that someone in this role would actually use. Make the prompts specific to the ${roleTitle} role in the ${industry} industry.${context ? `
+- Incorporate the specific context provided by the user` : ''}
+
+Format the response as a JSON object with this structure:
+{
+  "categories": [
+    {
+      "name": "Category Name",
+      "description": "Why this category is relevant",
+      "prompts": [
+        "Example prompt 1",
+        "Example prompt 2",
+        "Example prompt 3"
+      ]
+    }
+  ]
+}
+`;
+  }
+
+  private parseJobPromptsResponse(response: string, roleTitle: string, industry: string): JobPrompts {
+    try {
+      const parsed = JSON.parse(response);
+      return {
+        roleTitle,
+        industry,
+        categories: parsed.categories || [],
+        generatedAt: new Date().toISOString(),
+        cached: false
+      };
+    } catch (error) {
+      console.error('Error parsing job prompts response:', error);
+      throw new Error('Invalid response format from OpenAI');
+    }
+  }
+}
+
+export interface PromptCategory {
+  name: string;
+  description: string;
+  prompts: string[];
+}
+
+export interface JobPrompts {
+  roleTitle: string;
+  industry: string;
+  categories: PromptCategory[];
+  generatedAt: string;
+  cached: boolean;
 }

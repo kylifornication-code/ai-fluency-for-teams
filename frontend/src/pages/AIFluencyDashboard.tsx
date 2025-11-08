@@ -41,7 +41,9 @@ import {
   Link as LinkIcon,
   AutoAwesome as AutoAwesomeIcon,
   Edit as EditIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
+  Lightbulb as LightbulbIcon,
+  ContentCopy as ContentCopyIcon
 } from '@mui/icons-material';
 import axios from 'axios';
 
@@ -73,6 +75,20 @@ interface Resource {
   description: string;
 }
 
+interface PromptCategory {
+  name: string;
+  description: string;
+  prompts: string[];
+}
+
+interface JobPrompts {
+  roleTitle: string;
+  industry: string;
+  categories: PromptCategory[];
+  generatedAt: string;
+  cached: boolean;
+}
+
 interface AIFluencyDashboardProps {
   darkMode: boolean;
 }
@@ -89,7 +105,11 @@ const AIFluencyDashboard: React.FC<AIFluencyDashboardProps> = ({ darkMode }) => 
   const [context, setContext] = useState<string>('');
   const [showContextInput, setShowContextInput] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [jobPrompts, setJobPrompts] = useState<JobPrompts | null>(null);
+  const [loadingPrompts, setLoadingPrompts] = useState(false);
+  const [promptsError, setPromptsError] = useState<string | null>(null);
   const contextRef = useRef<HTMLDivElement>(null);
+  const promptsRef = useRef<HTMLDivElement>(null);
 
   // Load initial data
   useEffect(() => {
@@ -119,6 +139,10 @@ const AIFluencyDashboard: React.FC<AIFluencyDashboardProps> = ({ darkMode }) => 
       setError(null);
       setContext('');
       setShowContextInput(false);
+    }
+    if (jobPrompts) {
+      setJobPrompts(null);
+      setPromptsError(null);
     }
   }, [jobTitle, selectedIndustry]);
 
@@ -166,6 +190,44 @@ const AIFluencyDashboard: React.FC<AIFluencyDashboardProps> = ({ darkMode }) => 
     contextRef.current?.scrollIntoView({ 
       behavior: 'smooth',
       block: 'center'
+    });
+  };
+
+  const generateJobPrompts = async () => {
+    if (!jobTitle.trim() || !selectedIndustry) return;
+
+    setLoadingPrompts(true);
+    setPromptsError(null);
+
+    try {
+      const response = await axios.post('/api/job-prompts', {
+        roleTitle: jobTitle.trim(),
+        industry: selectedIndustry,
+        context: context.trim() || undefined
+      });
+      
+      setJobPrompts(response.data);
+      setLoadingPrompts(false);
+      
+      // Scroll to prompts section
+      setTimeout(() => {
+        promptsRef.current?.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 100);
+    } catch (err) {
+      setPromptsError('Failed to generate job prompts');
+      console.error('Error generating prompts:', err);
+      setLoadingPrompts(false);
+    }
+  };
+
+  const copyPromptToClipboard = (prompt: string) => {
+    navigator.clipboard.writeText(prompt).then(() => {
+      // You could add a toast notification here if desired
+    }).catch(err => {
+      console.error('Failed to copy prompt:', err);
     });
   };
 
@@ -453,6 +515,177 @@ const AIFluencyDashboard: React.FC<AIFluencyDashboardProps> = ({ darkMode }) => 
                     </Box>
                   </Box>
                 </Fade>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Job Prompts Section - Only show after table is generated */}
+        {fluencyTable && (
+          <Card sx={{ mb: 4 }} ref={promptsRef}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <LightbulbIcon color="primary" />
+                    AI Prompts for Your Role
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Discover useful AI prompts organized by category to help you in your daily work as a {jobTitle} in {selectedIndustry}
+                  </Typography>
+                </Box>
+                {!jobPrompts && (
+                  <Button
+                    variant="contained"
+                    onClick={generateJobPrompts}
+                    disabled={loadingPrompts}
+                    startIcon={loadingPrompts ? <CircularProgress size={20} /> : <AutoAwesomeIcon />}
+                    sx={{ 
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontWeight: 500,
+                      background: darkMode 
+                        ? 'linear-gradient(45deg, #90caf9 30%, #f48fb1 90%)'
+                        : 'linear-gradient(45deg, #1976d2 30%, #dc004e 90%)',
+                    }}
+                  >
+                    {loadingPrompts ? 'Generating...' : 'Generate Prompts'}
+                  </Button>
+                )}
+              </Box>
+
+              {promptsError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {promptsError}
+                </Alert>
+              )}
+
+              {loadingPrompts && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
+                  <CircularProgress sx={{ mb: 2 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Generating personalized prompts for your role...
+                  </Typography>
+                </Box>
+              )}
+
+              {jobPrompts && jobPrompts.categories.length > 0 && (
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    Generated on {new Date(jobPrompts.generatedAt).toLocaleDateString()}
+                    {jobPrompts.cached && (
+                      <Chip label="Cached" size="small" sx={{ ml: 1 }} color="info" variant="outlined" />
+                    )}
+                  </Typography>
+                  
+                  <Grid container spacing={3}>
+                    {jobPrompts.categories.map((category, categoryIndex) => (
+                      <Grid item xs={12} md={6} key={categoryIndex}>
+                        <Fade in timeout={600 + categoryIndex * 100}>
+                          <Accordion
+                            defaultExpanded={categoryIndex < 2}
+                            sx={{
+                              borderRadius: 2,
+                              '&:before': { display: 'none' },
+                              boxShadow: darkMode 
+                                ? '0 2px 8px rgba(0,0,0,0.3)' 
+                                : '0 2px 8px rgba(0,0,0,0.1)',
+                            }}
+                          >
+                            <AccordionSummary 
+                              expandIcon={<ExpandMoreIcon />}
+                              sx={{ 
+                                borderRadius: 2,
+                                '&.Mui-expanded': {
+                                  borderRadius: '8px 8px 0 0',
+                                }
+                              }}
+                            >
+                              <Box sx={{ width: '100%' }}>
+                                <Typography variant="h6" sx={{ fontWeight: 500, mb: 0.5 }}>
+                                  {category.name}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  {category.description}
+                                </Typography>
+                              </Box>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                {category.prompts.map((prompt, promptIndex) => (
+                                  <Paper
+                                    key={promptIndex}
+                                    elevation={0}
+                                    sx={{
+                                      p: 2,
+                                      bgcolor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                                      border: '1px solid',
+                                      borderColor: darkMode ? '#333' : '#e0e0e0',
+                                      borderRadius: 2,
+                                      position: 'relative',
+                                      '&:hover': {
+                                        borderColor: 'primary.main',
+                                        bgcolor: darkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+                                      }
+                                    }}
+                                  >
+                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                                      <Typography 
+                                        variant="body2" 
+                                        sx={{ 
+                                          flex: 1,
+                                          lineHeight: 1.6,
+                                          pr: 4
+                                        }}
+                                      >
+                                        {prompt}
+                                      </Typography>
+                                      <Tooltip title="Copy prompt">
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => copyPromptToClipboard(prompt)}
+                                          sx={{
+                                            position: 'absolute',
+                                            top: 8,
+                                            right: 8,
+                                            color: 'text.secondary',
+                                            '&:hover': {
+                                              color: 'primary.main',
+                                            }
+                                          }}
+                                        >
+                                          <ContentCopyIcon fontSize="small" />
+                                        </IconButton>
+                                      </Tooltip>
+                                    </Box>
+                                  </Paper>
+                                ))}
+                              </Box>
+                            </AccordionDetails>
+                          </Accordion>
+                        </Fade>
+                      </Grid>
+                    ))}
+                  </Grid>
+
+                  {jobPrompts && (
+                    <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+                      <Button
+                        variant="outlined"
+                        onClick={generateJobPrompts}
+                        disabled={loadingPrompts}
+                        startIcon={loadingPrompts ? <CircularProgress size={20} /> : <RefreshIcon />}
+                        sx={{ 
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          fontWeight: 500
+                        }}
+                      >
+                        {loadingPrompts ? 'Regenerating...' : 'Regenerate Prompts'}
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
               )}
             </CardContent>
           </Card>
