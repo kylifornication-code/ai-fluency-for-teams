@@ -21,7 +21,7 @@ export const config = {
   
   // Security Configuration
   security: {
-    jwtSecret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
+    jwtSecret: process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'dev-secret-key-only'),
     apiRateLimit: parseInt(process.env.API_RATE_LIMIT || '100'),
   },
 };
@@ -35,5 +35,14 @@ export const validateEnvironment = (): void => {
     console.warn(`⚠️  Missing required environment variables: ${missingVars.join(', ')}`);
     console.warn('Please set these variables in your .env file or environment');
     console.warn('Copy env.example to .env and fill in the values');
+  }
+
+  // In production, require JWT_SECRET to be explicitly set
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'your-secret-key-change-in-production') {
+      console.error('❌ ERROR: JWT_SECRET must be set in production environment');
+      console.error('Please set JWT_SECRET in your .env file with a strong, random secret');
+      process.exit(1);
+    }
   }
 };
