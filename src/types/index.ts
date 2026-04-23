@@ -37,3 +37,27 @@ export interface Resource {
   url: string;
   description: string;
 }
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  roleTitle: string;
+}
+
+export interface TeamMemberResult {
+  member: TeamMember;
+  assessment: FluencyTable;
+}
+
+export interface TeamMemberFailure {
+  member: TeamMember;
+  error: string;
+}
+
+export interface TeamAssessment {
+  industry: string;
+  context: string;
+  results: TeamMemberResult[];
+  failures?: TeamMemberFailure[];
+  generatedAt: string;
+}

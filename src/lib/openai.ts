@@ -14,7 +14,7 @@ function getClient(): OpenAI {
 }
 
 const MODEL = process.env.OPENAI_MODEL || "gpt-5.4";
-const MAX_TOKENS = 2000;
+const MAX_TOKENS = 4000;
 
 async function chat(system: string, user: string): Promise<string> {
   const client = getClient();
@@ -26,14 +26,21 @@ async function chat(system: string, user: string): Promise<string> {
     ],
     max_completion_tokens: MAX_TOKENS,
     temperature: 0.7,
+    response_format: { type: "json_object" },
   });
-  const content = completion.choices[0]?.message?.content;
+  const choice = completion.choices[0];
+  const content = choice?.message?.content;
   if (!content) throw new Error("No response from OpenAI");
+  if (choice.finish_reason === "length") {
+    throw new Error(
+      "Response was truncated — try a shorter role title or reduce team size"
+    );
+  }
   return content;
 }
 
 function extractJson(raw: string): unknown {
-  // Strip markdown code fences if present
+  // Strip markdown code fences if present (response_format: json_object usually prevents this)
   const match = raw.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
   return JSON.parse(match ? match[1] : raw);
 }
