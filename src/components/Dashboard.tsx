@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Sparkles, BookOpen, Library } from "lucide-react";
 import { AssessmentForm } from "./AssessmentForm";
 import { FluencyTable } from "./FluencyTable";
@@ -64,12 +65,10 @@ export function Dashboard() {
       <header className="border-b border-[#1e293b] bg-[#0f172a]/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#6366f1] flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
+            <Image src="/logo.png" alt="AI Fluency for Teams" width={32} height={32} className="rounded-lg" />
             <div>
               <h1 className="font-bold text-white text-sm leading-tight">AI Fluency for Teams</h1>
-              <p className="text-[#64748b] text-xs">Powered by GPT-4.1</p>
+              <p className="text-[#64748b] text-xs">Powered by GPT-5.4</p>
             </div>
           </div>
         </div>

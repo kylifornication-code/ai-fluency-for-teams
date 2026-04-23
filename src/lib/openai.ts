@@ -13,7 +13,7 @@ function getClient(): OpenAI {
   return _client;
 }
 
-const MODEL = process.env.OPENAI_MODEL || "gpt-4.1";
+const MODEL = process.env.OPENAI_MODEL || "gpt-5.4";
 const MAX_TOKENS = 2000;
 
 async function chat(system: string, user: string): Promise<string> {
@@ -24,7 +24,7 @@ async function chat(system: string, user: string): Promise<string> {
       { role: "system", content: system },
       { role: "user", content: user },
     ],
-    max_tokens: MAX_TOKENS,
+    max_completion_tokens: MAX_TOKENS,
     temperature: 0.7,
   });
   const content = completion.choices[0]?.message?.content;
