@@ -20,11 +20,14 @@ import { cn } from "@/lib/utils";
 
 type Tab = "fluency" | "prompts" | "resources";
 type Mode = "individual" | "manager";
+type FluencyLevel = "Unskilled" | "Capable" | "Adoptive" | "Transformative";
 
 export function Dashboard() {
   const [tab, setTab] = useState<Tab>("fluency");
   const [mode, setMode] = useState<Mode>("individual");
   const [fluencyData, setFluencyData] = useState<FluencyTableType | null>(null);
+  const [selfAssessmentLevel, setSelfAssessmentLevel] =
+    useState<FluencyLevel | null>(null);
   const [promptData, setPromptData] = useState<JobPrompts | null>(null);
   const [teamData, setTeamData] = useState<TeamAssessment | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -56,6 +59,7 @@ export function Dashboard() {
         });
         if (!res.ok) throw new Error((await res.json()).error);
         setFluencyData(await res.json());
+        setSelfAssessmentLevel(null);
       } else if (tab === "prompts") {
         const res = await fetch("/api/job-prompts", {
           method: "POST",
@@ -216,7 +220,11 @@ export function Dashboard() {
 
         {/* Results */}
         {tab === "fluency" && mode === "individual" && fluencyData && (
-          <FluencyTable data={fluencyData} />
+          <FluencyTable
+            data={fluencyData}
+            selfAssessmentLevel={selfAssessmentLevel}
+            onSelfAssess={setSelfAssessmentLevel}
+          />
         )}
         {tab === "fluency" && mode === "manager" && teamData && (
           <TeamFluencyTable data={teamData} />

@@ -250,28 +250,63 @@ function renderFluencyLevel(w: PdfWriter, level: FluencyLevel) {
   w.gap(6);
 }
 
-function renderFluencyHeader(w: PdfWriter, data: FluencyTable) {
+function renderFluencyHeader(
+  w: PdfWriter,
+  data: FluencyTable,
+  selfAssessedLevel?: string | null
+) {
   w.heading("AI Fluency Assessment");
   w.subheading(
     `${formatRole(data.roleId)} · ${data.industry} · Generated ${formatDate(data.generatedAt)}`
   );
+  if (selfAssessedLevel) {
+    w.gap(2);
+    w.paragraph("Self-assessed level:", { size: 10 });
+    w.gap(2);
+    w.levelBadge(selfAssessedLevel);
+  }
   w.rule();
   w.gap(6);
 }
 
-export function exportFluencyTableToPdf(data: FluencyTable) {
+function filterLevels(levels: FluencyLevel[], included?: string[]): FluencyLevel[] {
+  if (!included) return levels;
+  const set = new Set(included);
+  return levels.filter((l) => set.has(l.level));
+}
+
+export interface ExportFluencyOptions {
+  selfAssessedLevel?: string | null;
+  includedLevels?: string[];
+}
+
+export function exportFluencyTableToPdf(
+  data: FluencyTable,
+  options: ExportFluencyOptions = {}
+) {
   const w = new PdfWriter();
-  renderFluencyHeader(w, data);
-  for (const level of data.levels) {
+  renderFluencyHeader(w, data, options.selfAssessedLevel);
+
+  const levels = filterLevels(data.levels, options.includedLevels);
+  if (levels.length === 0) {
+    w.paragraph("No levels were selected for export.", { size: 11 });
+  }
+  for (const level of levels) {
     renderFluencyLevel(w, level);
   }
+
   const filename = `ai-fluency-${slugify(formatRole(data.roleId))}-${slugify(data.industry)}.pdf`;
   w.save(filename);
 }
 
+export interface ExportTeamOptions {
+  includedLevels?: string[];
+}
+
 export function exportTeamAssessmentToPdf(
   data: TeamAssessment,
-  selections: Record<string, string | null>
+  selections: Record<string, string | null>,
+  options: ExportTeamOptions = {}
 ) {
   const w = new PdfWriter();
 
@@ -329,16 +364,21 @@ export function exportTeamAssessmentToPdf(
   for (const result of data.results) {
     w.newPage();
     w.heading(result.member.name);
-    w.subheading(
-      `${result.member.roleTitle}${
-        selections[result.member.id]
-          ? ` · Assessed as ${selections[result.member.id]}`
-          : ""
-      }`
-    );
+    w.subheading(result.member.roleTitle);
+    const assessed = selections[result.member.id];
+    if (assessed) {
+      w.gap(2);
+      w.paragraph("Assessed level:", { size: 10 });
+      w.gap(2);
+      w.levelBadge(assessed);
+    }
     w.rule();
     w.gap(6);
-    for (const level of result.assessment.levels) {
+    const levels = filterLevels(result.assessment.levels, options.includedLevels);
+    if (levels.length === 0) {
+      w.paragraph("No levels were selected for export.", { size: 11 });
+    }
+    for (const level of levels) {
       renderFluencyLevel(w, level);
     }
   }

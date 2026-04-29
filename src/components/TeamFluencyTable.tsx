@@ -6,13 +6,13 @@ import {
   ChevronDown,
   ChevronRight,
   Check,
-  Download,
   Users,
 } from "lucide-react";
 import type { TeamAssessment, TeamMemberResult } from "@/types";
 import { cn } from "@/lib/utils";
 import { FluencyTable } from "./FluencyTable";
 import { exportTeamAssessmentToPdf } from "@/lib/pdf";
+import { ExportPdfMenu } from "./ExportPdfMenu";
 
 const LEVEL_ORDER = ["Unskilled", "Capable", "Adoptive", "Transformative"] as const;
 type Level = (typeof LEVEL_ORDER)[number];
@@ -118,14 +118,12 @@ export function TeamFluencyTable({ data }: Props) {
             {totalMembers} role{totalMembers !== 1 ? "s" : ""} · {data.industry}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => exportTeamAssessmentToPdf(data, assessments)}
-          className="ml-auto inline-flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg bg-[#1e293b] border border-[#334155] text-[#cbd5e1] hover:border-[#475569] hover:text-white transition-colors"
-        >
-          <Download className="w-3.5 h-3.5" />
-          Export PDF
-        </button>
+        <ExportPdfMenu
+          onExport={(includedLevels) =>
+            exportTeamAssessmentToPdf(data, assessments, { includedLevels })
+          }
+          className="ml-auto"
+        />
       </div>
 
       {/* Partial failure notice */}
